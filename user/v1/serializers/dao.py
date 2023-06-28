@@ -1,0 +1,31 @@
+from rest_framework import serializers
+
+from user.constants import UserType
+
+class CreateUserDao(serializers.Serializer):
+    name = serializers.CharField()
+    profile_pic_url = serializers.CharField(required=False)
+    email = serializers.CharField()
+    password = serializers.CharField()
+    type = serializers.ChoiceField(choices=UserType.value_list(), default=UserType.USER.value)
+
+class UpdateUserDao(serializers.Serializer):
+    uuid = serializers.CharField()
+    name = serializers.CharField(required=False)
+    profile_pic_url = serializers.CharField(required=False)
+    email = serializers.CharField(required=False)
+    type = serializers.CharField(required=False)
+
+class UUIDDao(serializers.Serializer):
+    uuid = serializers.CharField()
+    
+class UserSignUpDao(serializers.Serializer):
+    email = serializers.CharField(max_length=255, required=True)
+
+class GetUserDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100, required=False)
+    email = serializers.CharField(max_length=255, required=False)
+
+class EventDao(serializers.Serializer):
+    event = serializers.CharField(max_length=255, required=True)
+    description = serializers.CharField(max_length=255, required=False)

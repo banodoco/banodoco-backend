@@ -111,6 +111,7 @@ class AIModelListFilterDao(serializers.Serializer):
     data_per_page = serializers.IntegerField(default=100)
 
 
+############### INFERENCE LOG ###############
 class CreateInferenceLogDao(serializers.Serializer):
     project_id = serializers.CharField(max_length=100, required=False)
     model_id = serializers.CharField(max_length=100, required=False)
@@ -118,13 +119,29 @@ class CreateInferenceLogDao(serializers.Serializer):
     output_details = serializers.CharField(required=False)
     total_inference_time = serializers.CharField(required=False)
 
+class UpdateInferenceLogDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100)
+    project_id = serializers.CharField(max_length=100, required=False)
+    model_id = serializers.CharField(max_length=100, required=False)
+    input_params = serializers.CharField(required=False)
+    output_details = serializers.CharField(required=False)
+    total_inference_time = serializers.CharField(required=False)
 
+class InferenceLogListFilterDao(serializers.Serializer):
+    project_id = serializers.CharField(max_length=100, required=False)
+    model_id = serializers.CharField(max_length=100, required=False)
+    page = serializers.IntegerField(default=1)
+    data_per_page = serializers.IntegerField(default=100)
+
+
+################ PARAM MAP ###############
 class CreateAIModelParamMapDao(serializers.Serializer):
     model_id = serializers.CharField(max_length=100)
     standard_param_key = serializers.CharField(max_length=100, required=False)
     model_param_key = serializers.CharField(max_length=100, required=False)
 
 
+################ FRAME TIMING ###############
 class CreateTimingDao(serializers.Serializer):
     project_id = serializers.CharField(max_length=100)
     model_id = serializers.CharField(max_length=100, required=False)
@@ -157,6 +174,55 @@ class CreateTimingDao(serializers.Serializer):
     high_threshold = serializers.FloatField(default=0, required=False)
     aux_frame_index = serializers.IntegerField(required=False)
 
+class UpdateTimingDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100)
+    project_id = serializers.CharField(max_length=100, required=False)
+    model_id = serializers.CharField(max_length=100, required=False)
+    source_image_id = serializers.CharField(max_length=100, required=False)
+    interpolated_clip_id = serializers.CharField(max_length=100, required=False)
+    timed_clip_id = serializers.CharField(max_length=100, required=False)
+    mask_id = serializers.CharField(max_length=100, required=False)
+    canny_image_id = serializers.CharField(max_length=100, required=False)
+    preview_video_id = serializers.CharField(max_length=100, required=False)
+    custom_model_id_list = serializers.CharField(max_length=100, required=False)
+    frame_time = serializers.CharField(max_length=100)
+    frame_number = serializers.CharField(max_length=100, required=False)
+    primary_image = serializers.CharField(max_length=100, required=False)
+    alternative_images = serializers.CharField(max_length=100, required=False)
+    custom_pipeline = serializers.CharField(max_length=100, required=False)
+    prompt = serializers.CharField(max_length=1024, required=False)
+    negative_prompt = serializers.CharField(max_length=1024, required=False)
+    guidance_scale = serializers.FloatField(required=False)
+    seed = serializers.IntegerField(required=False)
+    num_inteference_steps = serializers.IntegerField(required=False)
+    strength = serializers.FloatField(required=False)
+    notes = serializers.CharField(max_length=1024, required=False)
+    adapter_type = serializers.CharField(max_length=255, required=False)
+    clip_duration = serializers.FloatField( required=False)
+    animation_style = serializers.CharField(
+        max_length=100, required=False
+    )
+    interpolation_steps = serializers.IntegerField(required=False)
+    low_threshold = serializers.FloatField( required=False)
+    high_threshold = serializers.FloatField( required=False)
+    aux_frame_index = serializers.IntegerField(required=False)
+
+class GetProjectTimingDao(serializers.Serializer):
+    project_id = serializers.CharField(max_length=100)
+    frame_number = serializers.IntegerField()
+
+class GetTimingNumberDao(serializers.Serializer):
+    project_id = serializers.CharField(max_length=100)
+    distance = serializers.IntegerField()
+
+class TimingListFilterDao(serializers.Serializer):
+    project_id = serializers.CharField(max_length=100, required=False)
+    page = serializers.IntegerField(default=1)
+    data_per_page = serializers.IntegerField(default=100)
+
+class ShiftTimingDao(serializers.Serializer):
+    project_id = serializers.CharField(max_length=100)
+    index_of_frame = serializers.IntegerField()
 
 class CreateAppSettingDao(serializers.Serializer):
     user_id = serializers.CharField(max_length=100)
@@ -219,7 +285,7 @@ class CreateSettingDao(serializers.Serializer):
 
 
 class UpdateSettingDao(serializers.Serializer):
-    uuid = serializers.CharField(max_length=255)
+    project_id = serializers.CharField(max_length=255)
     default_model_id = serializers.CharField(max_length=255, required=False)
     audio_id = serializers.CharField(max_length=255, required=False)
     input_video_id = serializers.CharField(max_length=255, required=False)

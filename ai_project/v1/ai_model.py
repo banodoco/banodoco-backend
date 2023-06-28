@@ -1,0 +1,150 @@
+from rest_framework.views import APIView
+from ai_project.models import AIModel
+from ai_project.v1.serializers.dao import AIModelListFilterDao, CreateAIModelDao, UUIDDao, UpdateAIModelDao
+from ai_project.v1.serializers.dto import AIModelDto
+from django.core.paginator import Paginator
+
+from middleware.authentication import auth_required
+from middleware.response import bad_request, success, unauthorized
+from user.constants import UserType
+from user.models import User
+
+class AIModelAPIView(APIView):
+    @auth_required('admin', 'user')
+    def get(self, request):
+        attributes = UUIDDao(data=request.query_params)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        ai_model = AIModel.objects.filter(uuid=attributes.data['uuid'], is_disbled=False).first()
+        if not ai_model:
+            return success({}, 'invalid model uuid', False)
+        
+        if ai_model.user.uuid != request.user.uuid and request.user.type != UserType.ADMIN.value:
+            return unauthorized({})
+        
+        payload = {
+            'data': AIModelDto(ai_model).data
+        }
+
+        return success(payload, 'successfully fetched the model', True)
+    
+    @auth_required('admin', 'user')
+    def post(self, request):
+        attributes = CreateAIModelDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        print(attributes.data)
+
+        user_id = attributes.data['user_id'] if request.role_type == UserType.ADMIN.value else request.role_id
+        
+        user = User.objects.filter(uuid=user_id, is_disabled=False).first()
+        if not user:
+            return success({}, 'invalid user', False)
+        
+        print(attributes.data['user_id'])
+        attributes._data['user_id'] = user.id
+    
+        ai_model = AIModel.objects.create(**attributes.data)
+        
+        payload = {
+            'data': AIModelDto(ai_model).data
+        }
+        
+        return success(payload, 'ai_model fetched', True)
+    
+    @auth_required('admin', 'user')
+    def delete(self, request):
+        attributes = UUIDDao(data=request.query_params)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        ai_model = AIModel.objects.filter(uuid=attributes.data['uuid'], is_disbled=False).first()
+        if not ai_model:
+            return success({}, 'invalid model uuid', False)
+        
+        if ai_model.user.uuid != request.user.uuid and request.user.type != UserType.ADMIN.value:
+            return unauthorized({})
+        
+        ai_model.is_disbled = True
+        ai_model.save()
+
+        return success({}, 'ai_model deleted', True)
+    
+    @auth_required('admin', 'user')
+    def put(self, request):
+        attributes = UpdateAIModelDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        ai_model =  AIModel.objects.filter(uuid=attributes.data['uuid'], is_disbled=False).first()
+        if not ai_model:
+            return success({}, 'invalid model uuid', False)
+        
+        if ai_model.user.uuid != request.role_id and request.user.type != UserType.ADMIN.value:
+            return unauthorized({})
+        
+        if 'user_id' in attributes.data and attributes.data['user_id']:
+            user = User.objects.filter(uuid=attributes.data['user_id'], is_disabled=False).first()
+            if not user:
+                return success({}, 'invalid user', False)
+            
+            print(attributes.data['user_id'])
+            attributes.data['user_id'] = user.id
+
+        for attr, value in attributes.data.items():
+            setattr(ai_model, attr, value)
+        ai_model.save()
+        
+        payload = {
+            'data': AIModelDto(ai_model).data
+        }
+        
+        return success(payload, 'ai_model fetched', True)
+    
+
+class AIModelListAPIView(APIView):
+    def __init__(self):
+        self.ai_model_list = []
+        
+    @auth_required('admin', 'user')
+    def get(self, request):
+        attributes = AIModelListFilterDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        page = attributes.data['page']
+        del attributes._data['page']
+        self.data_per_page = attributes.data["data_per_page"]
+        del attributes._data["data_per_page"]
+
+        self.ai_model_list = AIModel.objects.all()
+
+        user_id = attributes.data['user_id'] if request.role_type == UserType.ADMIN.value else request.role_id
+        user = User.objects.filter(uuid=user_id, is_disabled=False).first()
+        if not user:
+            return success({}, 'invalid user uuid', False)
+        
+        print(attributes.data)
+        attributes._data['user_id'] = user.id
+        attributes._data['is_disabled'] = False
+        
+        self.ai_model_list = AIModel.objects.filter(**attributes.data).all()
+
+        paginator = Paginator(self.ai_model_list, self.data_per_page)
+        if page > paginator.num_pages or page < 1:
+            return success({}, "invalid page number", False)
+        
+        payload = {
+            "data_per_page": self.data_per_page,
+            "page": page,
+            "total_pages": paginator.num_pages,
+            "count": paginator.count,
+            "data": AIModelDto(
+                paginator.page(page), many=True
+            ).data,
+        }
+        return success(payload, "model list fetched successfully", True)
+        
+        

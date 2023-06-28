@@ -92,7 +92,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'authentication',
-    'banodoco'
+    'banodoco',
+    'user',
+    'ai_project'
 ]
 
 MIDDLEWARE = [

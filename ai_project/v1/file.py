@@ -42,7 +42,7 @@ class FileView(APIView):
         return success(payload, "success", True)
 
     @auth_required("admin", "user")
-    def update(self, request):
+    def put(self, request):
         attributes = UpdateFileDao(data=request.data)
         if not attributes.is_valid():
             return bad_request(attributes.errors)

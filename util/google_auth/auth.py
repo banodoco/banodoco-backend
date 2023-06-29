@@ -1,7 +1,7 @@
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
-from neuralblade.settings import GOOGLE_AUTH_CLIENT_ID
+from banodoco.settings import GOOGLE_AUTH_CLIENT_ID
 from util.google_auth.serializers import GoogleUserDetailsDao
 
 

@@ -240,7 +240,6 @@ class FrameTimingView(APIView):
         
         return success({}, 'timing deleted successfully', True)
 
-
 class ProjectTimingView(APIView):
     # get timing from frame number and project
     @auth_required('admin', 'user')
@@ -317,7 +316,6 @@ class ShiftTimingViewDao(APIView):
 
         return success({}, 'frames moved successfully', True)
     
-
 class TimingListView(APIView):
     def __init__(self):
         self.timing_list = []

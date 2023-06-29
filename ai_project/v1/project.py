@@ -9,7 +9,7 @@ from middleware.response import bad_request, success, unauthorized
 from user.constants import UserType
 from user.models import User
 
-class ProjectAPIView(APIView):
+class ProjectView(APIView):
     @auth_required('admin', 'user')
     def get(self, request):
         attributes = UUIDDao(data=request.query_params)
@@ -90,8 +90,7 @@ class ProjectAPIView(APIView):
 
         return success({}, 'successfully deleted project', True)
     
-
-class  ProjectListAPIView(APIView):
+class  ProjectListView(APIView):
     def __init__(self):
         self.project_list = []
         

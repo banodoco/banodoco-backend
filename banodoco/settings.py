@@ -37,6 +37,8 @@ if SERVER == SERVER_ENV.DEV.value:
     AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET', '')
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY', '')
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_KEY', '')
+
+    GOOGLE_AUTH_CLIENT_ID = os.getenv('GOOGLE_AUTH_CLIENT_ID', '')
 else:
     # this config is assuming single deployed environment
     SECRET_KEY = ssm.get_parameter(Name='/django/banodoco/secret_key')['Parameter']['Value']
@@ -49,6 +51,8 @@ else:
     PGRES_DB_PORT = ssm.get_parameter(Name='/backend/banodoco/db/port')['Parameter']['Value']
 
     AWS_S3_BUCKET = ssm.get_parameter(Name='/backend/neuralblade/aws/s3/bucket')['Parameter']['Value']
+
+    GOOGLE_AUTH_CLIENT_ID = ssm.get_parameter(Name='/backend/neuralblade/google/auth/client_id')['Parameter']['Value']
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True

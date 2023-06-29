@@ -1,13 +1,10 @@
-from django.db import models
+from django.conf.urls import url
+from authentication.v1.auth import RefreshTokenView, UserLoginView
+from authentication.v1.google_auth import UserGoogleLoginView
 
-from banodoco.base_model import BaseModel
 
-# Create your models here.
-class Session(BaseModel):
-    token = models.TextField()
-    refresh_token = models.TextField()
-    role_id = models.CharField(max_length=50)
-    role_type = models.CharField(max_length=50)
-    
-    class Meta:
-        db_table = 'session'
+urlpatterns = [
+    url(r'^op$', UserLoginView.as_view()),
+    url(r'^refresh$', RefreshTokenView.as_view()),
+    url(r'^google$', UserGoogleLoginView.as_view()),
+]

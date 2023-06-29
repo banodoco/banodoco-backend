@@ -7,3 +7,9 @@ python-dotenv==0.19.2
 PyJWT==2.3.0
 stringcase==1.2.0
 cryptography==41.0.1
+google-auth==2.16.0
+google-api-core==2.11.0
+google-api-python-client==2.73.0
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==0.8.0
+googleapis-common-protos==1.58.0

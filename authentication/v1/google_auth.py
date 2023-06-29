@@ -52,8 +52,7 @@ class UserGoogleLoginView(APIView):
                     ]
                 )
             except Exception as e:
-                log_sentry_exception(
-                    "Unfiltr Daily Analytics Slack Error" + str(e), {}, traceback)
+                log_sentry_exception("Banodoco user sign in error" + str(e), {}, traceback)
 
         token, refresh_token = generate_tokens(user.uuid, "user")
         Session.objects.create(

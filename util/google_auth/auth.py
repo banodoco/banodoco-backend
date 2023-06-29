@@ -24,7 +24,7 @@ class GoogleAuth:
             first_name = user_data.data["given_name"] if "given_name" in user_data.data else user_data.data["email"].split('@')[0].replace('.', '')
             last_name = user_data.data["family_name"] if "family_name" in user_data.data else ""
             res["name"] = first_name + (last_name if last_name else "")
-            res["profile_pic_url"] = user_data.data["picture"] if "picture" in user_data.data else ""
+            # res["profile_pic_url"] = user_data.data["picture"] if "picture" in user_data.data else ""
             res["third_party_id"] = user_data.data["sub"]
             
             return res

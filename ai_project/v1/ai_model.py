@@ -23,14 +23,14 @@ class AIModelView(APIView):
             return bad_request(attributes.errors)
 
         ai_model = AIModel.objects.filter(
-            uuid=attributes.data["uuid"], is_disbled=False
+            uuid=attributes.data["uuid"], is_disabled=False
         ).first()
         if not ai_model:
             return success({}, "invalid model uuid", False)
 
         if (
-            ai_model.user.uuid != request.user.uuid
-            and request.user.type != UserType.ADMIN.value
+            ai_model.user.uuid != request.role_id
+            and request.role_type != UserType.ADMIN.value
         ):
             return unauthorized({})
 
@@ -46,17 +46,15 @@ class AIModelView(APIView):
 
         print(attributes.data)
 
-        user_id = (
-            attributes.data["user_id"]
-            if request.role_type == UserType.ADMIN.value
+        user_id = attributes.data["user_id"]\
+            if request.role_type == UserType.ADMIN.value and 'user_id' in attributes.data \
             else request.role_id
-        )
 
         user = User.objects.filter(uuid=user_id, is_disabled=False).first()
         if not user:
             return success({}, "invalid user", False)
 
-        print(attributes.data["user_id"])
+        print(attributes.data)
         attributes._data["user_id"] = user.id
 
         ai_model = AIModel.objects.create(**attributes.data)
@@ -72,18 +70,18 @@ class AIModelView(APIView):
             return bad_request(attributes.errors)
 
         ai_model = AIModel.objects.filter(
-            uuid=attributes.data["uuid"], is_disbled=False
+            uuid=attributes.data["uuid"], is_disabled=False
         ).first()
         if not ai_model:
             return success({}, "invalid model uuid", False)
 
         if (
-            ai_model.user.uuid != request.user.uuid
-            and request.user.type != UserType.ADMIN.value
+            ai_model.user.uuid != request.role_id
+            and request.role_type != UserType.ADMIN.value
         ):
             return unauthorized({})
 
-        ai_model.is_disbled = True
+        ai_model.is_disabled = True
         ai_model.save()
 
         return success({}, "ai_model deleted", True)
@@ -95,26 +93,29 @@ class AIModelView(APIView):
             return bad_request(attributes.errors)
 
         ai_model = AIModel.objects.filter(
-            uuid=attributes.data["uuid"], is_disbled=False
+            uuid=attributes.data["uuid"], is_disabled=False
         ).first()
         if not ai_model:
             return success({}, "invalid model uuid", False)
 
         if (
             ai_model.user.uuid != request.role_id
-            and request.user.type != UserType.ADMIN.value
+            and request.role_type != UserType.ADMIN.value
         ):
             return unauthorized({})
 
-        if "user_id" in attributes.data and attributes.data["user_id"]:
+        user_id = attributes.data["user_id"]\
+            if request.role_type == UserType.ADMIN.value and 'user_id' in attributes.data \
+            else request.role_id
+        if user_id:
             user = User.objects.filter(
-                uuid=attributes.data["user_id"], is_disabled=False
+                uuid=user_id, is_disabled=False
             ).first()
             if not user:
                 return success({}, "invalid user", False)
 
-            print(attributes.data["user_id"])
-            attributes.data["user_id"] = user.id
+            print(attributes.data)
+            attributes._data["user_id"] = user.id
 
         for attr, value in attributes.data.items():
             setattr(ai_model, attr, value)
@@ -141,11 +142,9 @@ class AIModelListView(APIView):
 
         self.ai_model_list = AIModel.objects.all()
 
-        user_id = (
-            attributes.data["user_id"]
-            if request.role_type == UserType.ADMIN.value
+        user_id = attributes.data["user_id"]\
+            if request.role_type == UserType.ADMIN.value and 'user_id' in attributes.data \
             else request.role_id
-        )
         user = User.objects.filter(uuid=user_id, is_disabled=False).first()
         if not user:
             return success({}, "invalid user uuid", False)

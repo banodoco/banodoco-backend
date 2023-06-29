@@ -8,6 +8,7 @@ from middleware.response import bad_request, success, unauthorized
 from user.constants import UserType
 from user.models import User
 
+# TODO: make sure only one app setting is present
 class AppSettingView(APIView):
     @auth_required('admin', 'user')
     def get(self, request):

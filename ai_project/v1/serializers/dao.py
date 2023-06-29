@@ -84,7 +84,7 @@ class ProjectFilterDao(serializers.Serializer):
 ################ AI MODEL ###############
 class CreateAIModelDao(serializers.Serializer):
     name = serializers.CharField(max_length=100)
-    user_id = serializers.CharField(max_length=100)
+    user_id = serializers.CharField(max_length=100, required=False)
     version = serializers.CharField(max_length=100, allow_null=True, required=False)
     replicate_url = serializers.CharField(max_length=512, default="", required=False)
     diffusers_url = serializers.CharField(max_length=512, default="", required=False)
@@ -106,7 +106,7 @@ class UpdateAIModelDao(serializers.Serializer):
 
 
 class AIModelListFilterDao(serializers.Serializer):
-    user_id = serializers.CharField(max_length=100)
+    user_id = serializers.CharField(max_length=100, required=False)
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
 

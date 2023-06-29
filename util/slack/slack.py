@@ -4,22 +4,21 @@ from datetime import datetime
 from slack_sdk.errors import SlackApiError
 import traceback
 
-from neuralblade.settings import SLACK_BOT_TOKEN
 from util.sentry import log_sentry_exception
 
-
+# TODO: activate slack client
 class SlackClient():
     def __init__(self):
-        # WebClient instantiates a client that can call API methods
-        # When using Bolt, you can use either `app.client` or the `client` passed to listeners.
-        self.client = WebClient(token=SLACK_BOT_TOKEN)
+        # self.client = WebClient(token=SLACK_BOT_TOKEN)
+        pass
 
     def send_message_to_channel(self, *args, channel: str, text: str, blocks, **kwargs):
-        try:
-            return self.client.chat_postMessage(*args, channel=channel, text=text, blocks=blocks, **kwargs)
-        except SlackApiError as e:
-            log_sentry_exception(
-                "Slack API Error " + str(e), {}, traceback)
+        # try:
+        #     return self.client.chat_postMessage(*args, channel=channel, text=text, blocks=blocks, **kwargs)
+        # except SlackApiError as e:
+        #     log_sentry_exception(
+        #         "Slack API Error " + str(e), {}, traceback)
+        pass
 
     def files_upload(self, *args, file: bytes, filename: str, filetype: str, channels: str, **kwargs):
         try:

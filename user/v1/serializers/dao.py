@@ -29,3 +29,10 @@ class GetUserDao(serializers.Serializer):
 class EventDao(serializers.Serializer):
     event = serializers.CharField(max_length=255, required=True)
     description = serializers.CharField(max_length=255, required=False)
+
+class UserListFilterDao(serializers.Serializer):
+    type = serializers.ChoiceField(
+        choices=UserType.value_list(), required=False
+    )
+    page = serializers.IntegerField(default=1)
+    data_per_page = serializers.IntegerField(default=20)

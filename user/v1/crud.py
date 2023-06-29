@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
+from django.core.paginator import Paginator
 from django.contrib.auth.hashers import make_password
 from authentication.v1.serializers.dto import UserDto
 from middleware.authentication import auth_required
 from middleware.response import bad_request, success
 from user.models import User
-from user.v1.serializers.dao import CreateUserDao, GetUserDao, UpdateUserDao
+from user.v1.serializers.dao import CreateUserDao, GetUserDao, UpdateUserDao, UserListFilterDao
 
 
 class UserView(APIView):
@@ -89,3 +90,38 @@ class UserView(APIView):
 
         return success(payload, "user fetched successfully", True)
     
+
+class UserListView(APIView):
+    def __init__(self):
+        self.user_list = []
+
+    @auth_required("admin", "user")
+    def get(self, request):
+        attributes = UserListFilterDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+
+        page = attributes.data["page"]
+        del attributes._data["page"]
+        self.data_per_page = attributes.data["data_per_page"]
+        del attributes._data["data_per_page"]
+
+        self.user_list = User.objects.all()
+
+        print(attributes.data)
+        attributes._data["is_disabled"] = False
+
+        self.user_list = self.user_list.filter(**attributes.data)
+
+        paginator = Paginator(self.user_list, self.data_per_page)
+        if page > paginator.num_pages or page < 1:
+            return success({}, "invalid page number", False)
+
+        payload = {
+            "data_per_page": self.data_per_page,
+            "page": page,
+            "total_pages": paginator.num_pages,
+            "count": paginator.count,
+            "data": UserDto(paginator.page(page), many=True).data,
+        }
+        return success(payload, "file list fetched successfully", True)

@@ -225,7 +225,7 @@ class ShiftTimingDao(serializers.Serializer):
     index_of_frame = serializers.IntegerField()
 
 class CreateAppSettingDao(serializers.Serializer):
-    user_id = serializers.CharField(max_length=100)
+    user_id = serializers.CharField(max_length=100, required=False)
     replicate_key = serializers.CharField(max_length=100, default="", required=False)
     aws_access_key = serializers.CharField(max_length=100, required=False)
     previous_project = serializers.CharField(max_length=100, required=False)
@@ -236,9 +236,7 @@ class CreateAppSettingDao(serializers.Serializer):
 
 
 class UpdateAppSettingDao(serializers.Serializer):
-    uuid = serializers.CharField(
-        max_length=100, required=False
-    )  # picking the first app setting by defaults
+    uuid = serializers.CharField(max_length=100)
     user_id = serializers.CharField(max_length=100, required=False)
     replicate_key = serializers.CharField(max_length=100, required=False)
     aws_access_key = serializers.CharField(max_length=100, required=False)

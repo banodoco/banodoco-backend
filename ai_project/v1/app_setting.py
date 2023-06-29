@@ -44,9 +44,8 @@ class AppSettingView(APIView):
             
             app_setting = AppSetting.objects.filter(uuid=cur_user.uuid, is_disabled=False).first()
 
-        
         if 'user_id' in attributes.data and attributes.data['user_id']:
-            if request.role_type != UserType.ADMIN.value:
+            if request.role_id != attributes.data['user_id'] and request.role_type != UserType.ADMIN.value:
                 return unauthorized({})
             
             user = User.objects.filter(uuid=attributes.data['user_id'], is_disabled=False).first()
@@ -70,8 +69,10 @@ class AppSettingView(APIView):
         
         print(attributes.data)
         
-        if 'user_id' in attributes.data and attributes.data['user_id']:
-            user = User.objects.filter(uuid=attributes.data['user_id'], is_disabled=False).first()
+        user_id = attributes.data['user_id'] if 'user_id' in attributes.data and \
+            attributes.data['user_id'] and request.role_type == UserType.ADMIN.value else request.role_id
+        if user_id:
+            user = User.objects.filter(uuid=user_id, is_disabled=False).first()
             if not user:
                 return success({}, 'invalid user', False)
             

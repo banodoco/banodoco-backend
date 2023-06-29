@@ -6,10 +6,7 @@ import os
 import shutil
 
 import requests
-from shared.constants import AWS_S3_BUCKET, AWS_S3_REGION, SERVER, ServerType
-from shared.logging.logging import AppLogger
-from shared.logging.constants import LoggingPayload, LoggingType
-logger = AppLogger()
+from banodoco.settings import AWS_S3_BUCKET, AWS_S3_REGION, SERVER
 
 
 def upload_file(file_location, aws_access_key, aws_secret_key, bucket=AWS_S3_BUCKET):
@@ -34,7 +31,7 @@ def upload_file(file_location, aws_access_key, aws_secret_key, bucket=AWS_S3_BUC
         #     dest = "videos/controlnet_test/assets/frames/1_selected/" + unique_file_name
         #     shutil.copy(file_location, dest)
         #     url = dest
-        logger.log(LoggingType.ERROR, 'unable to upload to s3')
+        print('unable to upload to S3')
 
     return url
 

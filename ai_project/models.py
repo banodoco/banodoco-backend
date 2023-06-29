@@ -15,7 +15,6 @@ class Project(BaseModel):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'project'
 
 
@@ -28,7 +27,6 @@ class InternalFileObject(BaseModel):
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, default=None, null=True)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'file'
 
     def save(self, *args, **kwargs):
@@ -55,7 +53,6 @@ class AIModel(BaseModel):
     keyword = models.CharField(max_length=255,default="", blank=True)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'ai_model'
     
 
@@ -67,7 +64,6 @@ class InferenceLog(BaseModel):
     total_inference_time = models.IntegerField(default=0)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'inference_log'
 
 
@@ -77,7 +73,6 @@ class AIModelParamMap(BaseModel):
     model_param_key = models.CharField(max_length=255, blank=True)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'model_param_map'
 
 class BackupTiming(BaseModel):
@@ -87,7 +82,6 @@ class BackupTiming(BaseModel):
     data_dump = models.TextField(default="", blank=True)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'backup_timing'
 
     @property
@@ -126,7 +120,6 @@ class Timing(BaseModel):
     transformation_stage = models.CharField(max_length=255, default=None, null=True)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'frame_timing'
 
     def __init__(self, *args, **kwargs):
@@ -204,7 +197,6 @@ class AppSetting(BaseModel):
     welcome_state = models.IntegerField(default=0)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'app_setting'
 
     def __init__(self, *args, **kwargs):
@@ -290,5 +282,4 @@ class Setting(BaseModel):
     rotation_angle_value = models.FloatField(default=0.0)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'setting'

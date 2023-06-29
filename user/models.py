@@ -2,7 +2,6 @@ from django.db import models
 
 from banodoco.base_model import BaseModel
 
-# Create your models here.
 
 class User(BaseModel):
     name = models.CharField(max_length=255, default="")
@@ -12,6 +11,5 @@ class User(BaseModel):
     third_party_id = models.CharField(max_length=255, default=None, null=True)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'user'
 

@@ -98,7 +98,7 @@ INSTALLED_APPS = [
     'authentication',
     'banodoco',
     'user',
-    'ai_project'
+    'ai_project',
 ]
 
 MIDDLEWARE = [

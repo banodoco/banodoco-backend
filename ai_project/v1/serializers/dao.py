@@ -67,7 +67,7 @@ class FileListFilterDao(serializers.Serializer):
 ################# PROJECT #############
 class CreateProjectDao(serializers.Serializer):
     name = serializers.CharField(max_length=100)
-    user_id = serializers.CharField(max_length=100)
+    user_id = serializers.CharField(max_length=100, required=False)
 
 
 class UpdateProjectDao(serializers.Serializer):
@@ -76,7 +76,7 @@ class UpdateProjectDao(serializers.Serializer):
 
 
 class ProjectFilterDao(serializers.Serializer):
-    user_id = serializers.CharField(max_length=100)
+    user_id = serializers.CharField(max_length=100, required=False)
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
 

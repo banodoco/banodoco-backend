@@ -9,6 +9,7 @@ from middleware.response import bad_request, success, unauthorized
 from user.constants import UserType
 from user.models import User
 
+# TODO: change the returned time in dto to timestamp
 class ProjectView(APIView):
     @auth_required('admin', 'user')
     def get(self, request):
@@ -32,7 +33,8 @@ class ProjectView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
-        user_id = attributes.data['user_id'] if request.role_type == UserType.ADMIN.value else request.role_id
+        user_id = attributes.data['user_id'] if request.role_type == UserType.ADMIN.value \
+            and 'user_id' in attributes.data else request.role_id
         user = User.objects.filter(uuid=user_id, is_disabled=False).first()
         if not user:
             return success({}, 'invalid user uuid', False)
@@ -105,7 +107,7 @@ class  ProjectListView(APIView):
         self.data_per_page = attributes.data["data_per_page"]
         del attributes._data["data_per_page"]
 
-        user_id = attributes.data['user_id'] if request.role_type == UserType.ADMIN.value else request.role_id
+        user_id = attributes.data['user_id'] if request.role_type == UserType.ADMIN.value and 'user_id' in attributes.data else request.role_id
         user = User.objects.filter(uuid=user_id, is_disabled=False).first()
         if not user:
             return success({}, 'invalid user uuid', False)

@@ -6,6 +6,7 @@ from ai_project.v1.serializers.dto import SettingDto
 from middleware.authentication import auth_required
 from middleware.response import bad_request, success, unauthorized
 from user.constants import UserType
+from user.models import User
 
 class ProjectSettingView(APIView):
     @auth_required('admin', 'user')
@@ -76,6 +77,7 @@ class ProjectSettingView(APIView):
 
         return success(payload, 'setting fetched', True)
     
+    # TODO: add check on stage type while updating
     @auth_required('admin', 'user')
     def put(self, request):
         attributes = UpdateSettingDao(data=request.data)
@@ -88,6 +90,9 @@ class ProjectSettingView(APIView):
         
         if project.user.uuid != request.role_id and request.role_type != UserType.ADMIN.value:
             return unauthorized({})
+        
+        print(attributes.data)
+        attributes._data['project_id'] = project.id
         
         setting = Setting.objects.filter(project_id=project.id, is_disabled=False).first()
         if not setting:

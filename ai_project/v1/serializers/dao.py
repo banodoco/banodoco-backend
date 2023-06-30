@@ -176,7 +176,6 @@ class CreateTimingDao(serializers.Serializer):
 
 class UpdateTimingDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
-    project_id = serializers.CharField(max_length=100, required=False)
     model_id = serializers.CharField(max_length=100, required=False)
     source_image_id = serializers.CharField(max_length=100, required=False)
     interpolated_clip_id = serializers.CharField(max_length=100, required=False)
@@ -212,11 +211,11 @@ class GetProjectTimingDao(serializers.Serializer):
     frame_number = serializers.IntegerField()
 
 class GetTimingNumberDao(serializers.Serializer):
-    project_id = serializers.CharField(max_length=100)
+    uuid = serializers.CharField(max_length=100)
     distance = serializers.IntegerField()
 
 class TimingListFilterDao(serializers.Serializer):
-    project_id = serializers.CharField(max_length=100, required=False)
+    project_id = serializers.CharField(max_length=100)
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
 

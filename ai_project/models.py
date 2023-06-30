@@ -147,8 +147,9 @@ class Timing(BaseModel):
                                             aux_frame_index__gte=self.aux_frame_index, is_disabled=False).order_by('frame_number')
             
             if not self.id:
-                # shifting aux_frame_index of all frames after this frame one forward
-                timing_list.update(aux_frame_index=F('aux_frame_index') + 1)
+                # shifting aux_frame_index of all frames after this frame one forward (if a frame is already present at that location)
+                if Timing.objects.filter(project_id=self.project_id, aux_frame_index=self.aux_frame_index, is_disabled=False).exists():
+                    timing_list.update(aux_frame_index=F('aux_frame_index') + 1)
             elif self.old_aux_frame_index != self.aux_frame_index:
                 # moving frames after the new index one forward
                 timing_list.filter(project_id=self.project_id, aux_frame_index__gte=self.aux_frame_index)\

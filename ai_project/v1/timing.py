@@ -30,14 +30,14 @@ class FrameTimingView(APIView):
     def post(self, request):
         attributes = CreateTimingDao(data=request.data)
         if not attributes.is_valid():
-            return success({}, attributes.errors, False)
+            return bad_request(attributes.errors)
         
         print(attributes.data)
         
         if 'project_id' in attributes.data and attributes.data['project_id']:
             project = Project.objects.filter(uuid=attributes.data['project_id'], is_disabled=False).first()
             if not project:
-                return success({}, 'invalid project', False)
+                return success({}, 'invalid project id', False)
             
             if project.user.uuid != request.role_id and request.role_type != UserType.ADMIN.value:
                 return unauthorized({})
@@ -248,7 +248,7 @@ class ProjectTimingView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
-        project = Project.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        project = Project.objects.filter(uuid=attributes.data['project_id'], is_disabled=False).first()
         if not project:
             return success({}, 'invalid project uuid', False)
         
@@ -277,7 +277,8 @@ class ProjectTimingView(APIView):
         Timing.objects.filter(project=project, is_disabled=False).update(is_disabled=True)
         
         return success({}, 'timings deleted successfully', True)
-    
+
+# to get say 2 frames after a certain frame
 class TimingNumberView(APIView):
     @auth_required('admin', 'user')
     def get(self, request):
@@ -297,7 +298,8 @@ class TimingNumberView(APIView):
         }
 
         return success(payload, 'timing fetched successfully', True)
-    
+
+# TODO: make this shifting more general depending on the usage
 class ShiftTimingViewDao(APIView):
     @auth_required('admin', 'user')
     def post(self, request):

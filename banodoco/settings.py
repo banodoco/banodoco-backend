@@ -24,6 +24,8 @@ AWS_S3_REGION = 'ap-south-1'
 AWS_ACCESS_KEY_ID = None
 AWS_SECRET_ACCESS_KEY = None
 
+AMOUNT_TO_CREDITS_MULTIPLIER = 1
+
 if SERVER == SERVER_ENV.DEV.value:
     SECRET_KEY = os.getenv('SECRET_KEY', 'secret')
     DEBUG = os.getenv('DEBUG', True)
@@ -41,6 +43,10 @@ if SERVER == SERVER_ENV.DEV.value:
     GOOGLE_AUTH_CLIENT_ID = os.getenv('GOOGLE_AUTH_CLIENT_ID', '')
 
     ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '')
+
+    STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', '')
+    STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
+    STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
 else:
     # this config is assuming single deployed environment
     SECRET_KEY = ssm.get_parameter(Name='/django/banodoco/secret_key')['Parameter']['Value']
@@ -57,6 +63,10 @@ else:
     GOOGLE_AUTH_CLIENT_ID = ssm.get_parameter(Name='/backend/banodoco/google/auth/client_id')['Parameter']['Value']
 
     ENCRYPTION_KEY = ssm.get_parameter(Name='/backend/banodoco/encryption/key')['Parameter']['Value']
+
+    STRIPE_PUBLIC_KEY = ssm.get_parameter(Name='/backend/banodoco/stripe/public_key')['Parameter']['Value']
+    STRIPE_SECRET_KEY = ssm.get_parameter(Name='/backend/banodoco/stripe/secret_key')['Parameter']['Value']
+    STRIPE_WEBHOOK_SECRET = ssm.get_parameter(Name='/backend/banodoco/stripe/webhook_secret')['Parameter']['Value']
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
@@ -103,6 +113,7 @@ INSTALLED_APPS = [
     'banodoco',
     'user',
     'ai_project',
+    'payment'
 ]
 
 MIDDLEWARE = [

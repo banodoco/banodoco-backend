@@ -62,9 +62,18 @@ class InferenceLog(BaseModel):
     input_params = models.TextField(default="", blank=True)
     output_details = models.TextField(default="", blank=True)
     total_inference_time = models.IntegerField(default=0)
+    total_credits_used = models.FloatField(default=0)
 
     class Meta:
         db_table = 'inference_log'
+
+    def save(self,  *args, **kwargs):
+        if not self.id:
+            user = self.project.user
+            user.total_credits -= (self.total_credits_used if self.total_credits_used else 0)
+            user.save()
+            
+        super(InferenceLog, self).save(*args, **kwargs)
 
 
 class AIModelParamMap(BaseModel):

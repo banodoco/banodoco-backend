@@ -9,6 +9,7 @@ class User(BaseModel):
     password = models.TextField(default=None, null=True)
     type = models.CharField(max_length=50, default="user")
     third_party_id = models.CharField(max_length=255, default=None, null=True)
+    total_credits = models.FloatField(default=0)
 
     class Meta:
         db_table = 'user'

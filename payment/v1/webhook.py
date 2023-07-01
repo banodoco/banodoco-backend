@@ -19,8 +19,9 @@ class WebhookView(APIView):
         event = stripe_client.validate_event(payload, sig_header)
 
         if event:
-            if event.type in [StripeEvent.INVOICE_PAYMENT_SUCCESS, StripeEvent.INVOICE_PAYMENT_FAILED]:
-                order_id = event.data.object.metadata['order_id']
+            print(event.type)
+            if event.type in [StripeEvent.INVOICE_PAYMENT_SUCCESS.value, StripeEvent.INVOICE_PAYMENT_FAILED.value]:
+                order_id = event.data.object.metadata['order_id'] if 'order_id' in event.data.object.metadata else None
                 if order_id:
                     order = PaymentOrder.objects.get(uuid=order_id, is_disabled=False).first()
                     if order:

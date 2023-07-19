@@ -12,6 +12,8 @@ from ai_project.constants import (
 class UUIDDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
 
+class OptionalUUIDDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100, required=False)
 
 class CreateUserDao(serializers.Serializer):
     name = serializers.CharField(max_length=100)
@@ -22,6 +24,9 @@ class CreateUserDao(serializers.Serializer):
 
 
 ############### FILE #################
+class FileUUIDListDao(serializers.Serializer):
+    uuid_list = serializers.ListField(child=serializers.CharField(max_length=100))
+    
 class CreateFileDao(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     type = serializers.ChoiceField(choices=InternalFileType.value_list())

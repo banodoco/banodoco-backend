@@ -27,32 +27,8 @@ class UserGoogleLoginView(APIView):
         
         user = User.objects.filter(email=user_data["email"], is_disabled=False).first()
         if not user:
-            user_data['credits'] = 20
+            # user_data['credits'] = 20
             user = User.objects.create(**user_data)
-            try:
-                slack_client = SlackClient()
-                res = slack_client.send_message_to_channel(
-                    channel=SLACK_APP_SIGNUP_CHANNEL,
-                    text=f"Data upload update",
-                    blocks=[
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "New user signup"
-                            }
-                        },
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": user.email
-                            },
-                        },
-                    ]
-                )
-            except Exception as e:
-                log_sentry_exception("Banodoco user sign in error" + str(e), {}, traceback)
 
         token, refresh_token = generate_tokens(user.uuid, "user")
         Session.objects.create(

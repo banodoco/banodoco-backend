@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from ai_project.models import AppSetting
-from ai_project.v1.serializers.dao import CreateAppSettingDao, UUIDDao, UpdateAppSettingDao
+from ai_project.v1.serializers.dao import CreateAppSettingDao, OptionalUUIDDao, UUIDDao, UpdateAppSettingDao
 from ai_project.v1.serializers.dto import AppSettingDto
 
 from middleware.authentication import auth_required
@@ -12,11 +12,21 @@ from user.models import User
 class AppSettingView(APIView):
     @auth_required('admin', 'user')
     def get(self, request):
-        attributes = UUIDDao(data=request.query_params)
+        attributes = OptionalUUIDDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
-        app_setting = AppSetting.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        if 'uuid' in attributes.data and attributes.data['uuid']:
+            app_setting = AppSetting.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+            if app_setting.user.uuid != request.role_id and request.role_type != UserType.ADMIN.value:
+                return unauthorized({})
+        else:
+            cur_user = User.objects.filter(uuid=request.role_id, is_disabled=False).first()
+            if not cur_user:
+                return unauthorized({})
+            
+            app_setting = AppSetting.objects.filter(uuid=cur_user.uuid, is_disabled=False).first()
+            
         if not app_setting:
             return bad_request('App setting not found')
 

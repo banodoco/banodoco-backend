@@ -5,6 +5,7 @@ from ai_project.models import InternalFileObject, Project
 from ai_project.v1.serializers.dao import (
     CreateFileDao,
     FileListFilterDao,
+    FileUUIDListDao,
     UUIDDao,
     UpdateFileDao,
 )
@@ -129,6 +130,20 @@ class FileView(APIView):
 
         return success(payload, "success", True)
 
+class FileUUIDListView(APIView):
+    @auth_required
+    def get(self, request):
+        attributes = FileUUIDListDao(data=request.query_params)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        file_list = InternalFileObject.objects.filter(uuid__in=attributes.data["uuid_list"], is_disabled=False).all()
+
+        payload = {
+            'data': InternalFileDto(file_list, many=True).data,
+        }
+
+        return success(payload, "success", True)
 
 class FileListView(APIView):
     def __init__(self):

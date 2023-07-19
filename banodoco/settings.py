@@ -41,6 +41,8 @@ if SERVER == SERVER_ENV.DEV.value:
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_KEY', '')
 
     GOOGLE_AUTH_CLIENT_ID = os.getenv('GOOGLE_AUTH_CLIENT_ID', '')
+    GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
+    GOOGLE_AUTH_REDIRECT_URI  = os.getenv('GOOGLE_AUTH_REDIRECT_URI', '')
 
     ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '')
 
@@ -61,6 +63,8 @@ else:
     AWS_S3_BUCKET = ssm.get_parameter(Name='/backend/banodoco/aws/s3/bucket')['Parameter']['Value']
 
     GOOGLE_AUTH_CLIENT_ID = ssm.get_parameter(Name='/backend/banodoco/google/auth/client_id')['Parameter']['Value']
+    GOOGLE_CLIENT_SECRET = ssm.get_parameter(Name='/backend/banodoco/google/auth/client_secret')['Parameter']['Value']
+    GOOGLE_AUTH_REDIRECT_URI = ssm.get_parameter(Name='/backend/banodoco/google/auth/redirect_uri')['Parameter']['Value']
 
     ENCRYPTION_KEY = ssm.get_parameter(Name='/backend/banodoco/encryption/key')['Parameter']['Value']
 

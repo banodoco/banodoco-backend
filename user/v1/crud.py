@@ -78,8 +78,9 @@ class UserView(APIView):
         elif 'email' in attributes.data and attributes.data['email']:
             user = User.objects.filter(email=attributes.data['email'], is_disabled=False).first()
         
+        # TODO: hackish way of fetching the current user, will update later
         if not user:
-            return success({}, "invalid user uuid", False)
+            user = request_user
         
         if not (request_user.id == user.id or request.role_type == 'admin'):
             return success({}, "unauthorized", False)

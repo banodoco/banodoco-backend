@@ -50,3 +50,9 @@ class InternalFileTag(ExtendedEnum):
 class AnimationStyleType(ExtendedEnum):
     INTERPOLATION = "Interpolation"
     DIRECT_MORPHING = "Direct Morphing"
+
+S3_FOLDER_PATH = {
+    'misc': 'misc/',
+    'general_pics': 'general_pics/',
+    'general_videos': 'general_videos/'
+}

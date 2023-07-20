@@ -49,7 +49,7 @@ class InferenceLogView(APIView):
                 return success({}, "invalid project", False)
 
             if (
-                project.user.uuid != request.role_id
+                str(project.user.uuid).replace('-','') != request.role_id
                 and request.role_type != UserType.ADMIN.value
             ):
                 return unauthorized({})
@@ -92,7 +92,7 @@ class InferenceLogView(APIView):
                 return success({}, "invalid project", False)
 
             if (
-                project.user.uuid != request.role_id
+                str(project.user.uuid).replace('-','') != request.role_id
                 and request.role_type != UserType.ADMIN.value
             ):
                 return unauthorized({})
@@ -159,7 +159,7 @@ class InferenceLogListView(APIView):
                 return success({}, "invalid project", False)
 
             if (
-                project.user.uuid != request.role_id
+                str(project.user.uuid).replace('-','') != request.role_id
                 and request.role_type != UserType.ADMIN.value
             ):
                 return unauthorized({})

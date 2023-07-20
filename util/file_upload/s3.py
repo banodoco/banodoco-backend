@@ -6,36 +6,57 @@ import os
 import shutil
 
 import requests
-from banodoco.settings import AWS_S3_BUCKET, AWS_S3_REGION, SERVER
+from banodoco.settings import AWS_ACCESS_KEY_ID, AWS_S3_BUCKET, AWS_S3_REGION, AWS_SECRET_ACCESS_KEY, SERVER, SERVER_ENV
 
+s3_client = boto3.client(
+    service_name='s3',
+    region_name=AWS_S3_REGION
+) if SERVER != SERVER_ENV.DEV.value else \
+    boto3.client(
+    service_name='s3',
+    region_name=AWS_S3_REGION,
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+)
 
-def upload_file(file_location, aws_access_key, aws_secret_key, bucket=AWS_S3_BUCKET):
-    url = None
-    ext = os.path.splitext(file_location)[1]
-    unique_file_name = str(uuid.uuid4()) + ext
-    try:
-        s3_file = f"input_images/{unique_file_name}"
-        s3 = boto3.client('s3', aws_access_key_id=aws_access_key,
-                          aws_secret_access_key=aws_secret_key)
-        s3.upload_file(file_location, bucket, s3_file)
-        s3.put_object_acl(ACL='public-read', Bucket=bucket, Key=s3_file)
-        url = f"https://s3.amazonaws.com/{bucket}/{s3_file}"
-    except Exception as e:
-        # # saving locally in the code directory if S3 upload fails (ONLY for LOCAL/DEV SERVER)
-        # if SERVER != ServerType.PRODUCTION.value:
-        #     logger = AppLogger()
-        #     logger.log(LoggingType.ERROR, LoggingPayload(
-        #         message=str(e), data={}))
+def upload_file(file, file_name='default', bucket=AWS_S3_BUCKET, object_name=None, folder='posts/'):
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = os.path.basename(file_name)
+    
+    unique_tag = str(uuid.uuid4())
+    file_extension = os.path.splitext(object_name)[1]
+    filename = unique_tag + file_extension
 
-        #     # TODO: fix the local destinations for different files
-        #     dest = "videos/controlnet_test/assets/frames/1_selected/" + unique_file_name
-        #     shutil.copy(file_location, dest)
-        #     url = dest
-        print('unable to upload to S3')
+    # Upload the file
+    content_type = mimetypes.guess_type(object_name)[0]
+    data = {
+        "Body": file,
+        "Bucket": bucket,
+        "Key": folder + filename,
+        "ACL": "public-read"
+    }
+    if content_type:
+        data['ContentType'] = content_type
+    
+    resp = s3_client.put_object(**data)
+    object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
+        AWS_S3_REGION,
+        AWS_S3_BUCKET,
+        folder + filename)
+    return object_url
 
-    return url
+def is_s3_image_url(url):
+    parsed_url = urlparse(url)
+    netloc = parsed_url.netloc.lower()
 
-# TODO: fix the structuring of s3 for different users and different files
+    if netloc.endswith('.amazonaws.com'):
+        subdomain = netloc[:-len('.amazonaws.com')].split('-')
+        if len(subdomain) > 1 and subdomain[0] == 's3':
+            return True
+
+    return False
+
 def generate_s3_url(image_url, aws_access_key, aws_secret_key, bucket=AWS_S3_BUCKET, file_ext='png', folder='posts/'):
     if object_name is None:
         object_name = str(uuid.uuid4()) + '.' + file_ext
@@ -77,14 +98,3 @@ def generate_s3_url(image_url, aws_access_key, aws_secret_key, bucket=AWS_S3_BUC
         AWS_S3_BUCKET,
         folder + object_name)
     return object_url
-
-def is_s3_image_url(url):
-    parsed_url = urlparse(url)
-    netloc = parsed_url.netloc.lower()
-
-    if netloc.endswith('.amazonaws.com'):
-        subdomain = netloc[:-len('.amazonaws.com')].split('-')
-        if len(subdomain) > 1 and subdomain[0] == 's3':
-            return True
-
-    return False

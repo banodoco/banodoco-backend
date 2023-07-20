@@ -61,6 +61,8 @@ else:
     PGRES_DB_PORT = ssm.get_parameter(Name='/backend/banodoco/db/port')['Parameter']['Value']
 
     AWS_S3_BUCKET = ssm.get_parameter(Name='/backend/banodoco/aws/s3/bucket')['Parameter']['Value']
+    AWS_ACCESS_KEY_ID = ssm.get_parameter(Name='/backend/banodoco/aws/access_key')['Parameter']['Value']
+    AWS_SECRET_ACCESS_KEY = ssm.get_parameter(Name='/backend/banodoco/aws/access_secret')['Parameter']['Value']
 
     GOOGLE_AUTH_CLIENT_ID = ssm.get_parameter(Name='/backend/banodoco/google/auth/client_id')['Parameter']['Value']
     GOOGLE_CLIENT_SECRET = ssm.get_parameter(Name='/backend/banodoco/google/auth/client_secret')['Parameter']['Value']

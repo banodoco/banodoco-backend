@@ -46,6 +46,10 @@ class CreateFileDao(serializers.Serializer):
 
         return data
 
+class UploadFileDao(serializers.Serializer):
+    file = serializers.FileField(allow_empty_file=True)
+    type = serializers.CharField(default='general_pics')
+    optimize = serializers.BooleanField(default=False)
 
 class UpdateFileDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)

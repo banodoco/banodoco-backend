@@ -39,7 +39,7 @@ class FrameTimingView(APIView):
             if not project:
                 return success({}, 'invalid project id', False)
             
-            if project.user.uuid != request.role_id and request.role_type != UserType.ADMIN.value:
+            if str(project.user.uuid).replace('-','') != request.role_id and request.role_type != UserType.ADMIN.value:
                 return unauthorized({})
             
             print(attributes.data)
@@ -339,7 +339,7 @@ class TimingListView(APIView):
             if not project:
                 return success({}, 'invalid project uuid', False)
             
-            if project.user.uuid != request.role_id and request.role_type != UserType.ADMIN.value:
+            if str(project.user.uuid).replace('-','') != request.role_id and request.role_type != UserType.ADMIN.value:
                 return unauthorized({})
 
             attributes._data['project_id'] = project.id

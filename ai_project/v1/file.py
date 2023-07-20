@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from django.db import models
 from django.core.paginator import Paginator
+from ai_project.constants import S3_FOLDER_PATH
 from ai_project.models import InternalFileObject, Project
 from ai_project.v1.serializers.dao import (
     CreateFileDao,
@@ -8,12 +9,14 @@ from ai_project.v1.serializers.dao import (
     FileUUIDListDao,
     UUIDDao,
     UpdateFileDao,
+    UploadFileDao,
 )
 from ai_project.v1.serializers.dto import InternalFileDto
 
 from middleware.authentication import auth_required
 from middleware.response import bad_request, success, unauthorized
 from user.constants import UserType
+from util.file_upload.s3 import upload_file
 
 
 class FileView(APIView):
@@ -31,7 +34,7 @@ class FileView(APIView):
 
         if file.project:
             if (
-                file.project.user.uuid != request.role_id
+                str(file.project.user.uuid).replace('-','') != request.role_id
                 and request.role_id != UserType.ADMIN.value
             ):
                 return unauthorized({})
@@ -56,7 +59,7 @@ class FileView(APIView):
 
         if file.project:
             if (
-                file.project.user.uuid != request.role_id
+                str(file.project.user.uuid).replace('-','') != request.role_id
                 and request.role_id != UserType.ADMIN.value
             ):
                 return unauthorized({})
@@ -96,7 +99,7 @@ class FileView(APIView):
 
         if file.project:
             if (
-                file.project.user.uuid != request.role_id
+                str(file.project.user.uuid).replace('-','') != request.role_id
                 and request.role_id != UserType.ADMIN.value
             ):
                 return unauthorized({})
@@ -187,3 +190,27 @@ class FileListView(APIView):
             "data": InternalFileDto(paginator.page(page), many=True).data,
         }
         return success(payload, "file list fetched successfully", True)
+
+class UploadFileView(APIView):
+    # @auth_required('admin', 'data_entry', 'user')
+    def post(self, request):
+        attributes = UploadFileDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+
+        if not attributes.data['type'] in S3_FOLDER_PATH.keys():
+            return success({}, "invalid type", False)
+
+        file = request.FILES['file']
+        url = upload_file(file, file_name=file.name.replace(" ", "_"), folder=S3_FOLDER_PATH[attributes.data['type']])
+
+        payload = {
+            'data': None
+        }
+
+        if url:
+            payload['data'] = url
+
+            return success(payload, "file uploaded succesfully", True)
+        else:
+            return success(payload, "file could not be uploaded", False)

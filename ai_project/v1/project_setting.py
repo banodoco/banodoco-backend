@@ -15,7 +15,7 @@ class ProjectSettingView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
-        project_uuid = attributes.data.get('project_id')
+        project_uuid = attributes.data.get('uuid')
         project = Project.objects.filter(uuid=project_uuid, is_disabled=False).first()
         if not project:
             return success({}, 'invalid project_id', False)

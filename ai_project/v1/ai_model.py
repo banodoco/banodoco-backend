@@ -29,7 +29,7 @@ class AIModelView(APIView):
             return success({}, "invalid model uuid", False)
 
         if (
-            ai_model.user.uuid != request.role_id
+            str(ai_model.user.uuid).replace('-','') != request.role_id
             and request.role_type != UserType.ADMIN.value
         ):
             return unauthorized({})
@@ -76,7 +76,7 @@ class AIModelView(APIView):
             return success({}, "invalid model uuid", False)
 
         if (
-            ai_model.user.uuid != request.role_id
+            str(ai_model.user.uuid).replace('-','') != request.role_id
             and request.role_type != UserType.ADMIN.value
         ):
             return unauthorized({})
@@ -99,7 +99,7 @@ class AIModelView(APIView):
             return success({}, "invalid model uuid", False)
 
         if (
-            ai_model.user.uuid != request.role_id
+            str(ai_model.user.uuid).replace('-','') != request.role_id
             and request.role_type != UserType.ADMIN.value
         ):
             return unauthorized({})

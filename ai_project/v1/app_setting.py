@@ -25,7 +25,7 @@ class AppSettingView(APIView):
             if not cur_user:
                 return unauthorized({})
             
-            app_setting = AppSetting.objects.filter(uuid=cur_user.uuid, is_disabled=False).first()
+            app_setting = AppSetting.objects.filter(user_id=cur_user.id, is_disabled=False).first()
             
         if not app_setting:
             return bad_request('App setting not found')
@@ -53,7 +53,7 @@ class AppSettingView(APIView):
             if not cur_user:
                 return unauthorized({})
             
-            app_setting = AppSetting.objects.filter(uuid=cur_user.uuid, is_disabled=False).first()
+            app_setting = AppSetting.objects.filter(user_id=cur_user.id, is_disabled=False).first()
 
         if 'user_id' in attributes.data and attributes.data['user_id']:
             if request.role_id != attributes.data['user_id'] and request.role_type != UserType.ADMIN.value:

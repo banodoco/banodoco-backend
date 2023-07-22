@@ -324,7 +324,7 @@ class TimingListView(APIView):
         
     @auth_required('admin', 'user')
     def get(self, request):
-        attributes = TimingListFilterDao(data=request.data)
+        attributes = TimingListFilterDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         

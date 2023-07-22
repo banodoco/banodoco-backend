@@ -131,7 +131,7 @@ class AIModelListView(APIView):
 
     @auth_required("admin", "user")
     def get(self, request):
-        attributes = AIModelListFilterDao(data=request.data)
+        attributes = AIModelListFilterDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 

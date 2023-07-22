@@ -34,7 +34,7 @@ class OrderListView(APIView):
 
     @auth_required("admin", "user")
     def get(self, request):
-        attributes = OrderListFilterDao(data=request.data)
+        attributes = OrderListFilterDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 

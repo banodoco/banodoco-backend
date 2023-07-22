@@ -141,7 +141,7 @@ class InferenceLogListView(APIView):
 
     @auth_required("admin", "user")
     def get(self, request):
-        attributes = InferenceLogListFilterDao(data=request.data)
+        attributes = InferenceLogListFilterDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 

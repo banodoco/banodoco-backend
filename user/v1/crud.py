@@ -98,7 +98,7 @@ class UserListView(APIView):
 
     @auth_required("admin", "user")
     def get(self, request):
-        attributes = UserListFilterDao(data=request.data)
+        attributes = UserListFilterDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 

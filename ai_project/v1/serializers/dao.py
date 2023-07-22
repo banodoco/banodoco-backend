@@ -244,7 +244,7 @@ class CreateAppSettingDao(serializers.Serializer):
 
 
 class UpdateAppSettingDao(serializers.Serializer):
-    uuid = serializers.CharField(max_length=100)
+    uuid = serializers.CharField(max_length=100, required=False)
     user_id = serializers.CharField(max_length=100, required=False)
     replicate_key = serializers.CharField(max_length=100, required=False)
     aws_access_key = serializers.CharField(max_length=100, required=False)

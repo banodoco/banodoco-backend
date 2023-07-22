@@ -154,7 +154,7 @@ class FileListView(APIView):
 
     @auth_required("admin", "user")
     def get(self, request):
-        attributes = FileListFilterDao(data=request.data)
+        attributes = FileListFilterDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 

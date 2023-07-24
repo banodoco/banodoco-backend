@@ -117,6 +117,7 @@ class UpdateAIModelDao(serializers.Serializer):
 class AIModelListFilterDao(serializers.Serializer):
     user_id = serializers.CharField(max_length=100, required=False)
     page = serializers.IntegerField(default=1)
+    model_type_list = serializers.ListField(child=serializers.CharField(max_length=100), required=False)
     data_per_page = serializers.IntegerField(default=100)
 
 
@@ -198,8 +199,8 @@ class UpdateTimingDao(serializers.Serializer):
     primary_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     alternative_images = serializers.CharField(max_length=100, allow_null=True, required=False)
     custom_pipeline = serializers.CharField(max_length=100, allow_null=True, required=False)
-    prompt = serializers.CharField(max_length=1024, required=False)
-    negative_prompt = serializers.CharField(max_length=1024, required=False)
+    prompt = serializers.CharField(max_length=1024, allow_blank=True, required=False)
+    negative_prompt = serializers.CharField(max_length=1024, allow_blank=True, required=False)
     guidance_scale = serializers.FloatField(required=False)
     seed = serializers.IntegerField(required=False)
     num_inteference_steps = serializers.IntegerField(required=False)

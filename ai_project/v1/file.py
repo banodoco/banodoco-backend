@@ -134,7 +134,7 @@ class FileView(APIView):
         return success(payload, "success", True)
 
 class FileUUIDListView(APIView):
-    @auth_required
+    @auth_required('admin', 'user')
     def get(self, request):
         attributes = FileUUIDListDao(data=request.query_params)
         if not attributes.is_valid():

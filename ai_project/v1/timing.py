@@ -26,12 +26,18 @@ class FrameTimingView(APIView):
 
         return success(payload, 'successfully fetched timing', True)
     
+    def _clean_attributes(self, attributes, request_data):
+        for k, v in attributes.data.items():
+            if k not in request_data:
+                del attributes._data[k]
+    
     @auth_required('admin', 'user')
     def post(self, request):
         attributes = CreateTimingDao(data=request.data)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
+        self._clean_attributes(attributes, request.data)
         print(attributes.data)
         
         if 'project_id' in attributes.data and attributes.data['project_id']:
@@ -134,6 +140,8 @@ class FrameTimingView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
+        self._clean_attributes(attributes, request.data)
+
         timing = Timing.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
         if not timing:
             return success({}, 'invalid timing uuid', False)

@@ -9,10 +9,11 @@ from banodoco.settings import SERVER, SERVER_ENV
 from user.models import User
 from util.file_upload.s3 import generate_s3_url, is_s3_image_url
 
-# Create your models here.
 class Project(BaseModel):
     name = models.CharField(max_length=255, default="")
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
+    temp_file_list = models.TextField(default=None, null=True)  # contains temp  files of the project in
+                                                            # {key: file_uuid} structure
 
     class Meta:
         db_table = 'project'

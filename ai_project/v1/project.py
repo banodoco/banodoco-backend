@@ -60,7 +60,7 @@ class ProjectView(APIView):
         if not project:
             return success({}, 'invalid project uuid', False)
         
-        if project.user_id != request.role_id and request.role_type != UserType.ADMIN.value:
+        if str(project.user.uuid).replace("-", "") != request.role_id and request.role_type != UserType.ADMIN.value:
             return unauthorized({})
         
         for k,v in attributes.data.items():

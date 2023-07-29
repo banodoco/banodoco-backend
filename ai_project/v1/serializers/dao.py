@@ -77,11 +77,13 @@ class FileListFilterDao(serializers.Serializer):
 class CreateProjectDao(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     user_id = serializers.CharField(max_length=100, required=False)
+    temp_file_list = serializers.CharField(max_length=None, required=False)
 
 
 class UpdateProjectDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
     name = serializers.CharField(max_length=100, required=False)
+    temp_file_list = serializers.CharField(max_length=None, required=False)
 
 
 class ProjectFilterDao(serializers.Serializer):
@@ -197,8 +199,8 @@ class UpdateTimingDao(serializers.Serializer):
     frame_time = serializers.CharField(max_length=100, required=False)
     frame_number = serializers.CharField(max_length=100, required=False)
     primary_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
-    alternative_images = serializers.CharField(max_length=100, allow_null=True, required=False)
-    custom_pipeline = serializers.CharField(max_length=100, allow_null=True, required=False)
+    alternative_images = serializers.CharField(max_length=None, allow_null=True, required=False)
+    custom_pipeline = serializers.CharField(max_length=255, allow_null=True, required=False)
     prompt = serializers.CharField(max_length=1024, allow_blank=True, required=False)
     negative_prompt = serializers.CharField(max_length=1024, allow_blank=True, required=False)
     guidance_scale = serializers.FloatField(required=False)

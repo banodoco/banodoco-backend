@@ -57,9 +57,8 @@ def is_s3_image_url(url):
 
     return False
 
-def generate_s3_url(image_url, aws_access_key, aws_secret_key, bucket=AWS_S3_BUCKET, file_ext='png', folder='posts/'):
-    if object_name is None:
-        object_name = str(uuid.uuid4()) + '.' + file_ext
+def generate_s3_url(image_url, bucket=AWS_S3_BUCKET, file_ext='png', folder='posts/'):
+    object_name = str(uuid.uuid4()) + '.' + file_ext
 
     response = requests.get(image_url)
     if response.status_code != 200:
@@ -79,12 +78,6 @@ def generate_s3_url(image_url, aws_access_key, aws_secret_key, bucket=AWS_S3_BUC
     else:
         data['ContentType'] = 'image/png'
 
-    s3_client = boto3.client(
-            service_name='s3',
-            region_name=AWS_S3_REGION,
-            aws_access_key_id=aws_access_key,
-            aws_secret_access_key=aws_secret_key,
-        )
     resp = s3_client.put_object(**data)
 
     extension = os.path.splitext(object_name)[1]

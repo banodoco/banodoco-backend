@@ -32,7 +32,7 @@ class InternalFileObject(BaseModel):
 
     def save(self, *args, **kwargs):
         # if the online url is not an s3 url and it's a production environment then we need to save the file in s3
-        if self.hosted_url and not is_s3_image_url(self.hosted_url) and SERVER == SERVER_ENV.PRODUCTION.value:
+        if self.hosted_url and not is_s3_image_url(self.hosted_url):
             self.hosted_url = generate_s3_url(self.hosted_url)
             
         super(InternalFileObject, self).save(*args, **kwargs)

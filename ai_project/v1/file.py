@@ -201,8 +201,12 @@ class UploadFileView(APIView):
         if not attributes.data['type'] in S3_FOLDER_PATH.keys():
             return success({}, "invalid type", False)
 
+        ext = ''
+        if 'extension' in attributes.data and attributes.data['extension']:
+            ext = attributes.data['extension']
+
         file = request.FILES['file']
-        url = upload_file(file, file_name=file.name.replace(" ", "_"), folder=S3_FOLDER_PATH[attributes.data['type']])
+        url = upload_file(file, file_name=file.name.replace(" ", "_") +  ext, folder=S3_FOLDER_PATH[attributes.data['type']])
 
         payload = {
             'data': None

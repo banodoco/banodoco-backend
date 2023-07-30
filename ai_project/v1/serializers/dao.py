@@ -48,6 +48,7 @@ class CreateFileDao(serializers.Serializer):
 
 class UploadFileDao(serializers.Serializer):
     file = serializers.FileField(allow_empty_file=True)
+    extension = serializers.CharField(default="", required=False)
     type = serializers.CharField(default='general_pics')
     optimize = serializers.BooleanField(default=False)
 

@@ -153,6 +153,13 @@ class AIModelListView(APIView):
         attributes._data["user_id"] = user.id
         attributes._data["is_disabled"] = False
 
+        if attributes.data['custom_trained'] == "all":
+            del  attributes._data['custom_trained']
+        elif attributes.data["custom_trained"] == "user":
+            attributes._data["custom_trained"] = True
+        else:
+            attributes._data["custom_trained"] = False
+
         if 'model_type_list' in attributes.data and attributes.data['model_type_list']:
             attributes._data['category__in'] = attributes.data['model_type_list']
             del attributes._data['model_type_list']

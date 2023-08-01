@@ -111,12 +111,12 @@ class CreateAIModelDao(serializers.Serializer):
 class UpdateAIModelDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
     name = serializers.CharField(max_length=100, required=False)
-    custom_trained = serializers.BooleanField(default=False, required=False)
+    custom_trained = serializers.BooleanField(required=False)
     user_id = serializers.CharField(max_length=100, required=False)
     version = serializers.CharField(max_length=100, required=False)
     replicate_url = serializers.CharField(max_length=512, default="", required=False)
     diffusers_url = serializers.CharField(max_length=512, default="", required=False)
-    training_image_list = serializers.CharField(max_length=None, default="", allow_blank=True, required=False)
+    training_image_list = serializers.CharField(max_length=None, allow_blank=True, required=False)
     category = serializers.ChoiceField(choices=AIModelType.value_list(), required=False)
     keyword = serializers.CharField(max_length=255, required=False)
 

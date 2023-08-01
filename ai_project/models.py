@@ -5,7 +5,7 @@ import urllib3
 from django.db.models import F
 
 from banodoco.base_model import BaseModel
-from banodoco.settings import SERVER, SERVER_ENV
+from banodoco.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, SERVER, SERVER_ENV
 from user.models import User
 from util.file_upload.s3 import generate_s3_url, is_s3_image_url
 
@@ -220,6 +220,13 @@ class AppSetting(BaseModel):
     def save(self, *args, **kwargs):
         from util.encryption import Encryptor
         encryptor = Encryptor()
+
+        # adding our own key for online use
+        if not self.aws_access_key:
+            self.aws_access_key = AWS_ACCESS_KEY_ID
+        
+        if not self.aws_secret_access_key:
+            self.aws_secret_access_key = AWS_SECRET_ACCESS_KEY
 
         new_access_key = not self.id or (self.old_aws_access_key != self.aws_access_key)
         new_replicate_key = not self.id or (self.old_replicate_key != self.replicate_key)

@@ -10,7 +10,7 @@ class CreateUserDao(serializers.Serializer):
     type = serializers.ChoiceField(choices=UserType.value_list(), default=UserType.USER.value)
 
 class UpdateUserDao(serializers.Serializer):
-    uuid = serializers.CharField()
+    uuid = serializers.CharField(required=False)
     name = serializers.CharField(required=False)
     profile_pic_url = serializers.CharField(required=False)
     email = serializers.CharField(required=False)

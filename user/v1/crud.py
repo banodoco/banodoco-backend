@@ -36,7 +36,11 @@ class UserView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
-        user = User.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        if 'uuid' in attributes.data and attributes.data['uuid']:
+            user = User.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        else:
+            user = User.objects.filter(uuid=request.role_id, is_disabled=False).first()
+            
         if not user:
             return success({}, 'invalid user uuid', False)
         

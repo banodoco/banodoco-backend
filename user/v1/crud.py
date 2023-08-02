@@ -50,6 +50,9 @@ class UserView(APIView):
             if user_with_email and user_with_email.uuid.hex != user.uuid.hex:
                 return success({}, 'email already exists', False)
         
+        if 'credits_to_add' in attributes.data:
+            attributes._data['total_credits'] = max(user.total_credits + attributes._data['credits_to_add'], 0)
+
         for attr, value in attributes.data.items():
             setattr(user, attr, value)
         

@@ -49,6 +49,9 @@ if SERVER == SERVER_ENV.DEV.value:
     STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', '')
     STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
     STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+
+    REPLICATE_KEY = os.getenv('REPLICATE_KEY', '')
+    REPLICATE_UESRNAME = os.getenv('REPLICATE_UESRNAME', '')
 else:
     # this config is assuming single deployed environment
     SECRET_KEY = ssm.get_parameter(Name='/django/banodoco/secret_key')['Parameter']['Value']
@@ -73,6 +76,9 @@ else:
     STRIPE_PUBLIC_KEY = ssm.get_parameter(Name='/backend/banodoco/stripe/public_key')['Parameter']['Value']
     STRIPE_SECRET_KEY = ssm.get_parameter(Name='/backend/banodoco/stripe/secret_key')['Parameter']['Value']
     STRIPE_WEBHOOK_SECRET = ssm.get_parameter(Name='/backend/banodoco/stripe/webhook_secret')['Parameter']['Value']
+
+    REPLICATE_KEY = ssm.get_parameter(Name='/backend/banodoco/replicate/key')['Parameter']['Value']
+    REPLICATE_UESRNAME = ssm.get_parameter(Name='/backend/banodoco/replicate/username')['Parameter']['Value']
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True

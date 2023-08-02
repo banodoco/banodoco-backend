@@ -15,7 +15,7 @@ class UpdateUserDao(serializers.Serializer):
     profile_pic_url = serializers.CharField(required=False)
     email = serializers.CharField(required=False)
     type = serializers.CharField(required=False)
-    credits_to_add = serializers.IntegerField(required=False)
+    credits_to_add = serializers.FloatField(required=False)
 
 class UUIDDao(serializers.Serializer):
     uuid = serializers.CharField()

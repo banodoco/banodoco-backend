@@ -299,7 +299,7 @@ class TimingNumberView(APIView):
             return success({}, 'invalid timing uuid', False)
         
         res_timing = Timing.objects.filter(project=timing.project, \
-                        aux_frame_index=timing.aux_frame_index + attributes.data['distance'], is_disabled=False).first()
+                        aux_frame_index=timing.aux_frame_index + attributes.data['distance'], project_id=timing.project_id, is_disabled=False).first()
         
         payload = {
             'data': TimingDto(res_timing).data if res_timing else None

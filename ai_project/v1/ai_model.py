@@ -160,12 +160,28 @@ class AIModelListView(APIView):
         else:
             attributes._data["custom_trained"] = False
 
+        model_category_list, model_type_list = None, None
+        if 'model_category_list' in attributes.data and attributes.data['model_category_list']:
+            model_category_list = attributes.data['model_category_list']
+            del attributes._data['model_category_list']
+        
         if 'model_type_list' in attributes.data and attributes.data['model_type_list']:
-            attributes._data['category__in'] = attributes.data['model_type_list']
+            model_type_list = attributes.data['model_type_list']
             del attributes._data['model_type_list']
+
 
         self.ai_model_list = AIModel.objects.filter(**attributes.data).all()
 
+        filtered_list = []
+        for model in self.ai_model_list:
+            category_check = True if (not model_category_list or (model_category_list and model.category in model_category_list)) else False
+            type_check = True if (not model_type_list or (model_type_list and any(item in model_type_list for item in json.loads(model.model_type)))) else False
+
+            if category_check and type_check:
+                filtered_list.append(model)
+
+        self.ai_model_list = filtered_list
+        
         paginator = Paginator(self.ai_model_list, self.data_per_page)
         if page > paginator.num_pages or page < 1:
             return success({}, "invalid page number", False)

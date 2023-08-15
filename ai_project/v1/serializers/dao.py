@@ -106,6 +106,7 @@ class CreateAIModelDao(serializers.Serializer):
     keyword = serializers.CharField(
         max_length=255, default="", allow_blank=True, required=False
     )
+    model_type = serializers.CharField(max_length=None)
 
 
 class UpdateAIModelDao(serializers.Serializer):
@@ -119,6 +120,7 @@ class UpdateAIModelDao(serializers.Serializer):
     training_image_list = serializers.CharField(max_length=None, allow_blank=True, required=False)
     category = serializers.ChoiceField(choices=AIModelType.value_list(), required=False)
     keyword = serializers.CharField(max_length=255, required=False)
+    model_type = serializers.CharField(max_length=None, required=False)
 
 
 class AIModelListFilterDao(serializers.Serializer):
@@ -126,6 +128,7 @@ class AIModelListFilterDao(serializers.Serializer):
     custom_trained = serializers.ChoiceField(default="all", choices=["user", "predefined", "all"], required=False)
     page = serializers.IntegerField(default=1)
     model_type_list = serializers.ListField(child=serializers.CharField(max_length=100), required=False)
+    model_category_list = serializers.ListField(child=serializers.CharField(max_length=100), required=False)
     data_per_page = serializers.IntegerField(default=100)
 
 

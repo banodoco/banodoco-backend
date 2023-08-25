@@ -30,11 +30,11 @@ if SERVER == SERVER_ENV.DEV.value:
     SECRET_KEY = os.getenv('SECRET_KEY', 'secret')
     DEBUG = os.getenv('DEBUG', True)
 
-    PGRES_DB_NAME = os.getenv('PGRES_DB_NAME', '')
-    PGRES_DB_USER = os.getenv('PGRES_DB_USER', '')
-    PGRES_DB_PASS = os.getenv('PGRES_DB_PASS', '')
-    PGRES_DB_HOST = os.getenv('PGRES_DB_HOST', '')
-    PGRES_DB_PORT = os.getenv('PGRES_DB_PORT', '')
+    DB_NAME = os.getenv('DB_NAME', '')
+    DB_USER = os.getenv('DB_USER', '')
+    DB_PASS = os.getenv('DB_PASS', '')
+    DB_HOST = os.getenv('DB_HOST', '')
+    DB_PORT = os.getenv('DB_PORT', '')
 
     AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET', '')
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY', '')
@@ -52,16 +52,18 @@ if SERVER == SERVER_ENV.DEV.value:
 
     REPLICATE_KEY = os.getenv('REPLICATE_KEY', '')
     REPLICATE_UESRNAME = os.getenv('REPLICATE_UESRNAME', '')
+
+
 else:
     # this config is assuming single deployed environment
     SECRET_KEY = ssm.get_parameter(Name='/django/banodoco/secret_key')['Parameter']['Value']
     DEBUG = os.getenv('DEBUG', False)
 
-    PGRES_DB_NAME = ssm.get_parameter(Name='/backend/banodoco/db/name')['Parameter']['Value']
-    PGRES_DB_USER = ssm.get_parameter(Name='/backend/banodoco/db/user')['Parameter']['Value']
-    PGRES_DB_PASS = ssm.get_parameter(Name='/backend/banodoco/db/password')['Parameter']['Value']
-    PGRES_DB_HOST = ssm.get_parameter(Name='/backend/banodoco/db/host')['Parameter']['Value']
-    PGRES_DB_PORT = ssm.get_parameter(Name='/backend/banodoco/db/port')['Parameter']['Value']
+    DB_NAME = ssm.get_parameter(Name='/backend/banodoco/db/name')['Parameter']['Value']
+    DB_USER = ssm.get_parameter(Name='/backend/banodoco/db/user')['Parameter']['Value']
+    DB_PASS = ssm.get_parameter(Name='/backend/banodoco/db/password')['Parameter']['Value']
+    DB_HOST = ssm.get_parameter(Name='/backend/banodoco/db/host')['Parameter']['Value']
+    DB_PORT = ssm.get_parameter(Name='/backend/banodoco/db/port')['Parameter']['Value']
 
     AWS_S3_BUCKET = ssm.get_parameter(Name='/backend/banodoco/aws/s3/bucket')['Parameter']['Value']
     AWS_ACCESS_KEY_ID = ssm.get_parameter(Name='/backend/banodoco/aws/access_key')['Parameter']['Value']
@@ -86,7 +88,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:4200',
-    'https://banodoco.ai'
+    'https://app.banodoco.ai'
     # add any other origins as needed
 ]
 
@@ -163,8 +165,14 @@ WSGI_APPLICATION = 'banodoco.wsgi.application'
 # TODO: add the prod config as well
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASS,
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 }
 

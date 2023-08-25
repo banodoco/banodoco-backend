@@ -21,3 +21,14 @@ class PaymentOrder(BaseModel):
 
     class Meta:
         db_table = 'order'
+
+    def __init__(self, *args, **kwargs):
+        super(PaymentOrder, self).__init__(*args, **kwargs)
+        self.old_status = self.status
+
+    def save(self, *args, **kwargs):
+        if self.id and self.old_status != self.status and self.status == PaymentOrderStatus.COMPLETED.value:
+            self.user.total_credits += self.total_credits
+            self.user.save()
+        
+        super().save(*args, **kwargs)

@@ -2,7 +2,7 @@ import stripe
 
 from banodoco.settings import STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 from payment.models import PaymentOrder
-from util.payment.stripe_constants import TEST_USD_20_BANODOCO_CREDITS, USD_10_BANODOCO_CREDITS
+from util.payment.stripe_constants import TEST_USD_10_BANODOCO_CREDITS, USD_10_BANODOCO_CREDITS
 
 # TODO: create a redirect page
 class Stripe:
@@ -10,15 +10,15 @@ class Stripe:
         self.client = stripe
         self.client.api_key = STRIPE_SECRET_KEY
 
-    def create_payment_link(self, quantity, order: PaymentOrder):
+    def create_payment_link(self, order: PaymentOrder, quantity = 1):
         payment_obj = self.client.PaymentLink.create(
-                line_items=[{"price": TEST_USD_20_BANODOCO_CREDITS, "quantity": quantity}],
+                line_items=[{"price": TEST_USD_10_BANODOCO_CREDITS, "quantity": quantity}],
                 after_completion={"type": "redirect", "redirect": {"url": "https://example.com"}},
                 invoice_creation={
                     "enabled": True,
                     "invoice_data": {
                         "description": "Invoice for Banodoco Credits",
-                        "metadata": {"order_identifier": order.identifier},
+                        "metadata": {"order_identifier": order.identifier, "order_id": order.uuid},
                         "custom_fields": [{"name": "email", "value": order.user.email}],
                         "footer": "Banodoco Inc.",
                     },

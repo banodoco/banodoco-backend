@@ -310,7 +310,7 @@ class UpdateSettingDao(serializers.Serializer):
     input_video_id = serializers.CharField(max_length=255, required=False)
     default_prompt = serializers.CharField(max_length=255, required=False)
     default_strength = serializers.CharField(max_length=255, required=False)
-    default_custom_pipeline = serializers.CharField(max_length=255, required=False)
+    default_custom_pipeline = serializers.CharField(max_length=255, required=False, allow_blank=True)
     input_type = serializers.CharField(max_length=255, required=False)
     extraction_type = serializers.CharField(max_length=255, required=False)
     width = serializers.IntegerField(required=False)

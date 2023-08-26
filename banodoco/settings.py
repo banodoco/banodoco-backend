@@ -69,9 +69,9 @@ else:
     AWS_ACCESS_KEY_ID = ssm.get_parameter(Name='/backend/banodoco/aws/access_key')['Parameter']['Value']
     AWS_SECRET_ACCESS_KEY = ssm.get_parameter(Name='/backend/banodoco/aws/access_secret')['Parameter']['Value']
 
-    GOOGLE_AUTH_CLIENT_ID = ssm.get_parameter(Name='/backend/banodoco/google/auth/client_id')['Parameter']['Value']
-    GOOGLE_CLIENT_SECRET = ssm.get_parameter(Name='/backend/banodoco/google/auth/client_secret')['Parameter']['Value']
-    GOOGLE_AUTH_REDIRECT_URI = ssm.get_parameter(Name='/backend/banodoco/google/auth/redirect_uri')['Parameter']['Value']
+    GOOGLE_AUTH_CLIENT_ID = ssm.get_parameter(Name='/google/auth/client_id')['Parameter']['Value']
+    GOOGLE_CLIENT_SECRET = ssm.get_parameter(Name='/google/auth/secret')['Parameter']['Value']
+    GOOGLE_AUTH_REDIRECT_URI = ssm.get_parameter(Name='/google/auth/redirect_url')['Parameter']['Value']
 
     ENCRYPTION_KEY = ssm.get_parameter(Name='/backend/banodoco/encryption/key')['Parameter']['Value']
 

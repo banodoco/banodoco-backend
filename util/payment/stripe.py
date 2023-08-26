@@ -1,6 +1,7 @@
 import stripe
+from ai_project.constants import ServerType
 
-from banodoco.settings import STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
+from banodoco.settings import SERVER, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
 from payment.models import PaymentOrder
 from util.payment.stripe_constants import TEST_USD_10_BANODOCO_CREDITS, USD_10_BANODOCO_CREDITS
 
@@ -11,9 +12,10 @@ class Stripe:
         self.client.api_key = STRIPE_SECRET_KEY
 
     def create_payment_link(self, order: PaymentOrder, quantity = 1):
+        price = TEST_USD_10_BANODOCO_CREDITS # if SERVER == ServerType.DEVELOPMENT.value else USD_10_BANODOCO_CREDITS
         payment_obj = self.client.PaymentLink.create(
-                line_items=[{"price": TEST_USD_10_BANODOCO_CREDITS, "quantity": quantity}],
-                after_completion={"type": "redirect", "redirect": {"url": "https://example.com"}},
+                line_items=[{"price": price, "quantity": quantity}],
+                after_completion={"type": "redirect", "redirect": {"url": "https://payment.banodoco.ai/success"}},
                 invoice_creation={
                     "enabled": True,
                     "invoice_data": {

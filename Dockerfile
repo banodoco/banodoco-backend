@@ -7,7 +7,7 @@ WORKDIR banodoco-backend
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt
-RUN echo "SERVER=development" > .env
+RUN echo "SERVER=production" > .env
 
 COPY . .
 

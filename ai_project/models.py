@@ -338,3 +338,14 @@ class Setting(BaseModel):
 
     class Meta:
         db_table = 'setting'
+
+
+class TestModels(BaseModel):
+    file_url = models.TextField(default="")
+    name = models.TextField(default="", blank=True)
+    desc = models.TextField(default="", blank=True)
+    sample_asset_list = models.TextField(default=None, null=True, blank=True)
+    uploaded_by = models.TextField(default="", blank=True)
+
+    class Meta:
+        db_table = 'test_model'

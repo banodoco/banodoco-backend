@@ -1,1 +1,1 @@
-nohup gunicorn -c gunicorn.conf.py moment.wsgi:application
+nohup gunicorn -c gunicorn.conf.py banodoco.wsgi:application

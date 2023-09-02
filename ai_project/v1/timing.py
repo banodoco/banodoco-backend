@@ -354,7 +354,7 @@ class TimingListView(APIView):
         
         attributes._data['is_disabled'] = False
         
-        self.timing_list = Timing.objects.filter(**attributes.data).all()
+        self.timing_list = Timing.objects.filter(**attributes.data).order_by('aux_frame_index').all()
 
         paginator = Paginator(self.timing_list, self.data_per_page)
         if page > paginator.num_pages or page < 1:

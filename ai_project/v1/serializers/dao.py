@@ -209,7 +209,7 @@ class UpdateTimingDao(serializers.Serializer):
     frame_number = serializers.CharField(max_length=100, required=False)
     primary_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     alternative_images = serializers.CharField(max_length=None, allow_null=True, required=False)
-    custom_pipeline = serializers.CharField(max_length=255, allow_null=True, required=False)
+    custom_pipeline = serializers.CharField(max_length=255, allow_null=True, allow_blank=True, required=False)
     prompt = serializers.CharField(max_length=1024, allow_blank=True, required=False)
     negative_prompt = serializers.CharField(max_length=1024, allow_blank=True, required=False)
     guidance_scale = serializers.FloatField(required=False)

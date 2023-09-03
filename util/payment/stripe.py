@@ -12,7 +12,7 @@ class Stripe:
         self.client.api_key = STRIPE_SECRET_KEY
 
     def create_payment_link(self, order: PaymentOrder, quantity = 1):
-        price = TEST_USD_10_BANODOCO_CREDITS # if SERVER == ServerType.DEVELOPMENT.value else USD_10_BANODOCO_CREDITS
+        price = TEST_USD_10_BANODOCO_CREDITS if SERVER == ServerType.DEVELOPMENT.value else USD_10_BANODOCO_CREDITS
         payment_obj = self.client.PaymentLink.create(
                 line_items=[{"price": price, "quantity": quantity}],
                 after_completion={"type": "redirect", "redirect": {"url": "https://payment.banodoco.ai/success"}},

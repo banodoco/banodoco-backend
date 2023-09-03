@@ -36,3 +36,32 @@ jobs:
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      env:
+        ECS_TASK_DEFINITION: .aws/task-definition.json
+        CONTAINER_NAME: backend-banodoco-backend
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@c804dfbdd57f713b6c079302a4c01db7017a36fc
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        container-name: ${{ env.CONTAINER_NAME }}
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition
+      env:
+        ECS_SERVICE: backend-banodoco-backend-service
+        ECS_CLUSTER: backend-banodoco-backend-cluster
+      uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true
+
+    - name: Run migrations
+      run:
+        aws configure set aws_access_key_id ${{ secrets.AWS_ECR_ACCESS_KEY }}
+        aws configure set aws_secret_access_key ${{ secrets.AWS_ECR_SECRET_KEY }}
+        task_id=$(aws ecs list-tasks --cluster backend-banodoco-backend-cluster --service-name backend-banodoco-backend-service --query "taskArns[0]" --output text)
+        aws ecs execute-command --cluster backend-banodoco-backend-cluster --task $task_id --container backend-banodoco-backend --command "python manage.py migrate"

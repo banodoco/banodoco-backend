@@ -22,7 +22,7 @@ jobs:
     
     - name: Run migration
       run: |
-        sudo docker run -d --name django-be-container django-be
+        sudo docker run -d --name django-be-container django-be-image
         sudo docker exec -it django-be-container python manage.py migrate
 
     - name: Clear container and image

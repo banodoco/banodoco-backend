@@ -18,20 +18,20 @@ jobs:
     
     - name: Build docker image
       run: |
-        docker build -t django-be-image .
+        sudo docker build -t django-be-image .
     
     - name: Run migration
       run: |
-        docker run -d --name django-be-container django-be
-        docker exec -it django-be-container python manage.py migrate
+        sudo docker run -d --name django-be-container django-be
+        sudo docker exec -it django-be-container python manage.py migrate
 
     - name: Clear container and image
       run: |
-        docker stop django-be-container
-        docker rm django-be-container
-        docker rmi django-be-image
-        docker ps -aq --no-trunc --filter "status=exited" | xargs docker rm
-        docker images -q --filter "dangling=true" | xargs docker rmi
+        sudo docker stop django-be-container
+        sudo docker rm django-be-container
+        sudo docker rmi django-be-image
+        sudo docker ps -aq --no-trunc --filter "status=exited" | xargs docker rm
+        sudo docker images -q --filter "dangling=true" | xargs docker rmi
 
   build:
     needs: migrate

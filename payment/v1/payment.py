@@ -20,8 +20,8 @@ class PaymentView(APIView):
         if not user:
             return success({}, 'invalid user', True)
         
-        attributes.data['total_amount'] -= attributes.data['total_amount'] % 10
-        quatity = int(attributes.data['total_amount'] / 10)
+        attributes.data['total_amount'] -= attributes.data['total_amount'] % 1
+        quatity = int(attributes.data['total_amount'])
         
         order_data = {
             "name" : 'Banodoco Credits',

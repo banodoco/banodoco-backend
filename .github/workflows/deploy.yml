@@ -30,7 +30,7 @@ jobs:
         sudo docker stop django-be-container
         sudo docker rm django-be-container
         sudo docker rmi django-be-image
-        sudo docker system prune -a
+        sudo docker system prune -af
 
   build:
     needs: migrate

@@ -7,9 +7,33 @@ on:
 
 jobs:
   
-  build:
+  migrate:
+    name: Run migrations
+    runs-on: self-hosted
+
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v2
     
-    name: Build Image
+    - name: Build docker image
+      run: |
+        docker built -t django-be-image .
+    
+    - name: Run migration
+      run: |
+        docker run -d --name django-be-container django-be
+        docker exec -it django-be-container python manage.py migrate
+
+    - name: Clear container and image
+      run: |
+        docker stop django-be-container
+        docker rm django-be-container
+        docker rmi django-be-image
+
+  build:
+    needs: migrate
+    name: Build and Deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -61,9 +85,4 @@ jobs:
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
 
-    - name: Run migrations
-      run:
-        aws configure set aws_access_key_id ${{ secrets.AWS_ECR_ACCESS_KEY }}
-        aws configure set aws_secret_access_key ${{ secrets.AWS_ECR_SECRET_KEY }}
-        task_id=$(aws ecs list-tasks --cluster backend-banodoco-backend-cluster --service-name backend-banodoco-backend-service --query "taskArns[0]" --output text)
-        aws ecs execute-command --cluster backend-banodoco-backend-cluster --task $task_id --container backend-banodoco-backend --command "python manage.py migrate"
+  build:

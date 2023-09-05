@@ -35,7 +35,7 @@ jobs:
   build:
     needs: migrate
     name: Build and Deploy
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
 

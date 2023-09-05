@@ -15,7 +15,7 @@ class Stripe:
         price = TEST_USD_01_BANODOCO_CREDITS if SERVER == ServerType.DEVELOPMENT.value else USD_01_BANODOCO_CREDITS
         payment_obj = self.client.PaymentLink.create(
                 line_items=[{"price": price, "quantity": quantity}],
-                after_completion={"type": "redirect", "redirect": {"url": "https://payment.banodoco.ai/success"}},
+                after_completion={"type": "redirect", "redirect": {"url": "https://payment.banodoco.ai"}},
                 invoice_creation={
                     "enabled": True,
                     "invoice_data": {

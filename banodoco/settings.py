@@ -53,7 +53,7 @@ if SERVER == SERVER_ENV.DEV.value:
     REPLICATE_KEY = os.getenv('REPLICATE_KEY', '')
     REPLICATE_UESRNAME = os.getenv('REPLICATE_UESRNAME', '')
 
-
+    STATIC_AUTH_TOKEN = os.getenv('STATIC_AUTH_TOKEN', '')
 else:
     # this config is assuming single deployed environment
     SECRET_KEY = ssm.get_parameter(Name='/django/banodoco/secret_key')['Parameter']['Value']
@@ -81,6 +81,8 @@ else:
 
     REPLICATE_KEY = ssm.get_parameter(Name='/backend/banodoco/replicate/key')['Parameter']['Value']
     REPLICATE_UESRNAME = ssm.get_parameter(Name='/backend/banodoco/replicate/username')['Parameter']['Value']
+
+    STATIC_AUTH_TOKEN = ssm.get_parameter(Name='/backend/banodoco/auth/static-token')['Parameter']['Value']
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True

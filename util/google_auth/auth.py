@@ -1,10 +1,12 @@
 import asyncio
+import traceback
 import httpx
 from httpx_oauth.clients.google import GoogleOAuth2
 import json
 
 from banodoco.settings import GOOGLE_AUTH_CLIENT_ID, GOOGLE_AUTH_REDIRECT_URI, GOOGLE_CLIENT_SECRET
 from util.google_auth.serializers import GoogleUserDetailsDao
+from util.sentry import log_sentry_exception
 
 
 class GoogleAuth:
@@ -62,4 +64,5 @@ class GoogleAuth:
             return res
         except Exception as e:
             print("invalid user token: ", e)
+            log_sentry_exception("Google auth error " + str(e), {}, traceback)
             return None

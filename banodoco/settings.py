@@ -129,7 +129,8 @@ INSTALLED_APPS = [
     'banodoco',
     'user',
     'ai_project',
-    'payment'
+    'payment',
+    'ai_data'
 ]
 
 MIDDLEWARE = [

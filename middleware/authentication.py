@@ -29,20 +29,17 @@ def auth_required(*users):
         return wrap
     return authenticator
 
-def static_auth_required():
-    def authenticator(func):
-        def wrap(context, request):
-            if 'HTTP_AUTHORIZATION' not in request.META:
-                return unauthorized({})
+def static_auth_required(func):
+    def authenticator(context, request):
+        if 'HTTP_AUTHORIZATION' not in request.META:
+            return unauthorized({})
 
-            token = request.META['HTTP_AUTHORIZATION']
-            if token != STATIC_AUTH_TOKEN:
-                return unauthorized({})
-            
-            return func(context, request)
-            
-        wrap.__name__ = func.__name__
-        return wrap
+        token = request.META['HTTP_AUTHORIZATION']
+        token = token.replace('Bearer ', '')
+        if token != STATIC_AUTH_TOKEN:
+            return unauthorized({})
+        
+        return func(context, request)
     
     return authenticator
 

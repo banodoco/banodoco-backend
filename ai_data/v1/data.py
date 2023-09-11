@@ -73,10 +73,10 @@ class TrainingDataCRUDView(APIView):
         
         start_idx, end_idx = attributes.data['start_idx'], attributes.data['end_idx']
         if 'caption' in attributes.data and attributes.data['caption']:
-            ai_data.add_caption(start_idx, end_idx, attributes.data['caption'])
+            ai_data.add_caption(start_idx, end_idx, attributes.data["user_id"], attributes.data['caption'])
         
         if 'rating' in attributes.data and attributes.data['rating'] != None:
-            ai_data.add_rating(start_idx, end_idx, attributes.data['rating'])
+            ai_data.add_rating(start_idx, end_idx,  attributes.data["user_id"], attributes.data['rating'])
 
         ai_data.save()
 

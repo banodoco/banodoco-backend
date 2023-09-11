@@ -26,6 +26,7 @@ class UpdateTrainingDataDao(serializers.Serializer):
     end_idx = serializers.IntegerField()
     caption = serializers.CharField(max_length=None, allow_blank=True, allow_null=True, required=False)
     rating = serializers.IntegerField(required=False)
+    user_id = serializers.CharField(max_length=255, required=False)
 
     def validate(self, data):
         uuid = data.get("uuid")
@@ -34,6 +35,11 @@ class UpdateTrainingDataDao(serializers.Serializer):
         if not uuid and not video_url:
             raise serializers.ValidationError(
                 "At least one of uuid or video_url is required."
+            )
+        
+        if (data.get("caption") or data.get("rating")) and not data.get("user_id"):
+            raise serializers.ValidationError(
+                "user_id is required while updating caption or rating"
             )
 
         return data
@@ -69,3 +75,13 @@ class UpdateImageCaptionDataDao(serializers.Serializer):
     img_2_desc = serializers.CharField(max_length=None, required=False)
     instruction = serializers.CharField(max_length=None, default="", required=False)
     user_rating = serializers.IntegerField(required=False)
+    user_id = serializers.CharField(max_length=255, required=False)
+
+    def validate(self, data):
+        
+        if data.get("user_rating") and not data.get("user_id"):
+            raise serializers.ValidationError(
+                "user_id is required while updating rating"
+            )
+
+        return data

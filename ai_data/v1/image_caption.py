@@ -51,12 +51,11 @@ class ImageCaptionCRUDView(APIView):
         if not caption_data:
             return success({}, "invalid uuid", False)
         
-        #NOTE: right now just adding any incoming rating to the list
         if 'user_rating' in attributes.data:
-            caption_data_rating_list = caption_data.user_rating_list
-            caption_data_rating_list.append(attributes.data['user_rating'])
+            caption_data.update_user_rating(attributes.data['user_id'], attributes.data['user_rating'])
             print(attributes.data)
-            attributes._data['user_rating'] = json.dumps(caption_data_rating_list)
+            del attributes._data['user_rating']
+            del attributes._data['user_id']
 
         for attr, value in attributes.data.items():
             setattr(caption_data, attr, value)

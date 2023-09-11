@@ -4,20 +4,31 @@ from typing import List
 
 
 @dataclass
-class ClipData:
-    caption_list: List[str]
-    caption_count: int
-    rating_list: List[int]
-    rating_count: int
-    avg_rating: float
+class UserClipData:
+    user_id: str
+    caption: str
+    rating: int
 
     def to_json(self):
         return {
-            "caption_list": self.caption_list,
+            "user_id": self.user_id,
+            "caption": self.caption,
+            "rating": self.rating
+        }
+
+@dataclass
+class ClipData:
+    caption_count: int
+    rating_count: int
+    avg_rating: float
+    user_data_list: List[UserClipData]
+
+    def to_json(self):
+        return {
             "caption_count": self.caption_count,
-            "rating_list": self.rating_list,
             "rating_count": self.rating_count,
-            "avg_rating": self.avg_rating
+            "avg_rating": self.avg_rating,
+            "user_data_list": [ud for ud in self.user_data_list]
         }
 
 
@@ -45,11 +56,10 @@ class VideoDataManager:
     def create_clip_data(start_idx, end_idx):
         # creates a clip data with default values
         clip_data = {
-            "caption_list": [],
             "caption_count": 0,
-            "rating_list": [],
             "rating_count": 0,
-            "avg_rating": 0
+            "avg_rating": 0,
+            "user_data_list": []
         }
 
         return ClipData(**clip_data)

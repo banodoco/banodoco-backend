@@ -94,7 +94,7 @@ class TrainingDataCRUDView(APIView):
 
         ai_data = self._get_training_data(attributes.data)
         if ai_data:
-            ai_data.is_disabled = False
+            ai_data.is_disabled = True
             ai_data.save()
 
         return success({}, 'data cleared', True)

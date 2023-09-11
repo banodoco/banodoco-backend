@@ -46,3 +46,24 @@ class TrainingData(BaseModel):
         clip_data.avg_rating = round(total_sum / clip_data.rating_count, 2)
 
         self.user_data = VideoDataManager.update_clip_data(start_idx, end_idx, self.user_data, clip_data)
+
+
+class ImageCaptionData(BaseModel):
+    img_1_url = models.TextField(default="", blank=True)
+    img_1_desc = models.TextField(default="", blank=True)
+    img_2_url = models.TextField(default="", blank=True)
+    img_2_desc = models.TextField(default="", blank=True)
+    instruction = models.TextField(default="", blank=True)
+    user_rating = models.TextField(default=None, null=True)
+
+    class Meta:
+        db_table = 'image_caption_data'
+
+    @property
+    def user_rating_list(self):
+        return json.loads(self.user_rating) if self.user_rating else []
+    
+    @user_rating_list.setter
+    def user_rating_list(self, val):
+        if val:
+            self.user_rating = json.dumps(val)

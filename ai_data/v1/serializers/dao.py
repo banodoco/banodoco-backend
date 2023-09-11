@@ -42,4 +42,30 @@ class UpdateTrainingDataDao(serializers.Serializer):
 class TrainingDataFilterDao(serializers.Serializer):
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
-    # min_avg_rating = serializers.FloatField(default=0.0, required=False)
+
+
+class CaptionDataListFilterDao(serializers.Serializer):
+    page = serializers.IntegerField(default=1)
+    data_per_page = serializers.IntegerField(default=100)
+
+
+class UUIDDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100)
+
+
+class CreateImageCaptionDataDao(serializers.Serializer):
+    img_1_url = serializers.CharField(max_length=None)
+    img_1_desc = serializers.CharField(max_length=None)
+    img_2_url = serializers.CharField(max_length=None)
+    img_2_desc = serializers.CharField(max_length=None)
+    instruction = serializers.CharField(max_length=None, default="")
+
+
+class UpdateImageCaptionDataDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100)
+    img_1_url = serializers.CharField(max_length=None, required=False)
+    img_1_desc = serializers.CharField(max_length=None, required=False)
+    img_2_url = serializers.CharField(max_length=None, required=False)
+    img_2_desc = serializers.CharField(max_length=None, required=False)
+    instruction = serializers.CharField(max_length=None, default="", required=False)
+    user_rating = serializers.IntegerField(required=False)

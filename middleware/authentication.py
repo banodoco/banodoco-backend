@@ -2,7 +2,7 @@ import traceback
 import jwt
 from middleware.response import unauthorized
 from authentication.models import Session
-from banodoco.settings import SECRET_KEY
+from banodoco.settings import SECRET_KEY, STATIC_AUTH_TOKEN
 
 def auth_required(*users):
     def authenticator(func):
@@ -27,6 +27,20 @@ def auth_required(*users):
             
         wrap.__name__ = func.__name__
         return wrap
+    return authenticator
+
+def static_auth_required(func):
+    def authenticator(context, request):
+        if 'HTTP_AUTHORIZATION' not in request.META:
+            return unauthorized({})
+
+        token = request.META['HTTP_AUTHORIZATION']
+        token = token.replace('Bearer ', '')
+        if token != STATIC_AUTH_TOKEN:
+            return unauthorized({})
+        
+        return func(context, request)
+    
     return authenticator
 
 def refresh_token():

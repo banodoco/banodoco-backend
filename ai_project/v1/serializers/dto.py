@@ -159,12 +159,15 @@ class InferenceLogDto(serializers.ModelSerializer):
     class Meta:
         model = InferenceLog
         fields = (
+            "uuid",
             "project", 
             "model", 
             "input_params", 
             "output_details", 
             "total_inference_time",
-            "created_on"
+            "created_on",
+            "updated_on",
+            "status"
         )
 
 class BackupDto(serializers.ModelSerializer):

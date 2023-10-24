@@ -14,9 +14,16 @@ class Project(BaseModel):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
     temp_file_list = models.TextField(default=None, null=True)  # contains temp  files of the project in
                                                             # {key: file_uuid} structure
+    meta_data = models.TextField(default=None, null=True)
 
     class Meta:
         db_table = 'project'
+
+class DBLock(BaseModel):
+    row_key = models.CharField(max_length=255, unique=True)
+
+    class Meta:
+        db_table = 'lock'
 
 
 class InternalFileObject(BaseModel):
@@ -66,6 +73,7 @@ class InferenceLog(BaseModel):
     output_details = models.TextField(default="", blank=True)
     total_inference_time = models.IntegerField(default=0)
     total_credits_used = models.FloatField(default=0)
+    status = models.CharField(max_length=255, default="")   # success, failed, in_progress
 
     class Meta:
         db_table = 'inference_log'
@@ -127,8 +135,8 @@ class Timing(BaseModel):
     animation_style = models.CharField(max_length=255, default=None, null=True)
     interpolation_steps = models.IntegerField(default=0)
     low_threshold = models.FloatField(default=0)
-    high_threshold = models.FloatField(default=0)
-    aux_frame_index = models.IntegerField(default=0)    # starts with 0 # TODO: udpate this
+    high_threshold = models.FloatField(default=100)
+    aux_frame_index = models.IntegerField(default=200)    # starts with 0 # TODO: udpate this
     transformation_stage = models.CharField(max_length=255, default=None, null=True)
 
     class Meta:
@@ -162,7 +170,7 @@ class Timing(BaseModel):
             elif self.old_aux_frame_index != self.aux_frame_index:
                 if self.aux_frame_index >= self.old_aux_frame_index:
                     timings_to_move = Timing.objects.filter(project_id=self.project_id, aux_frame_index__gt=self.old_aux_frame_index, \
-                                    aux_frame_index__lte=self.aux_frame_index, is_disabled=False)
+                                    aux_frame_index__lte=self.aux_frame_index, is_disabled=False).order_by('aux_frame_index')
                     frame_time_list = [self.frame_time]
                     for t in timings_to_move:
                         frame_time_list.append(t.frame_time)
@@ -175,7 +183,7 @@ class Timing(BaseModel):
                     timings_to_move.update(aux_frame_index=F('aux_frame_index') - 1)
                 else:
                     timings_to_move = Timing.objects.filter(project_id=self.project_id, aux_frame_index__gte=self.aux_frame_index, \
-                                       aux_frame_index__lt=self.old_aux_frame_index, is_disabled=False)
+                                       aux_frame_index__lt=self.old_aux_frame_index, is_disabled=False).order_by('aux_frame_index')
                     
                     frame_time_list = [self.frame_time]
                     for t in reversed(timings_to_move):
@@ -194,7 +202,11 @@ class Timing(BaseModel):
                     
                 self.interpolated_video_id = None
                 self.timed_clip_id = None
-                
+            
+        # if timed_clip is deleted then preview_video will also be deleted
+        if self.old_timed_clip and (not self.timed_clip or self.old_timed_clip != self.timed_clip):
+            self.preview_video = None
+
         super().save(*args, **kwargs)
 
 
@@ -305,7 +317,6 @@ class AppSetting(BaseModel):
         from util.encryption import Encryptor
         encryptor = Encryptor()
         return encryptor.decrypt(self.stability_key) if self.stability_key else None
-
 
 
 class Setting(BaseModel):

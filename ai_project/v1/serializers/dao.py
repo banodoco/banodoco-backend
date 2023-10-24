@@ -26,6 +26,13 @@ class CreateUserDao(serializers.Serializer):
 ############### FILE #################
 class FileUUIDListDao(serializers.Serializer):
     uuid_list = serializers.ListField(child=serializers.CharField(max_length=100))
+
+class LogUUIDListDao(serializers.Serializer):
+    log_uuid_list = serializers.ListField(child=serializers.CharField(max_length=100))
+
+class LockDao(serializers.Serializer):
+    action = serializers.CharField(default='acquire')
+    key = serializers.CharField()
     
 class CreateFileDao(serializers.Serializer):
     name = serializers.CharField(max_length=100)
@@ -79,12 +86,14 @@ class CreateProjectDao(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     user_id = serializers.CharField(max_length=100, required=False)
     temp_file_list = serializers.CharField(max_length=None, required=False)
+    meta_data = serializers.CharField(max_length=None, required=False)
 
 
 class UpdateProjectDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
     name = serializers.CharField(max_length=100, required=False)
     temp_file_list = serializers.CharField(max_length=None, required=False)
+    meta_data = serializers.CharField(max_length=None, required=False)
 
 
 class ProjectFilterDao(serializers.Serializer):
@@ -139,6 +148,7 @@ class CreateInferenceLogDao(serializers.Serializer):
     input_params = serializers.CharField(required=False)
     output_details = serializers.CharField(required=False)
     total_inference_time = serializers.CharField(required=False)
+    status = serializers.CharField(required=False, default="")
 
 class UpdateInferenceLogDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
@@ -147,12 +157,14 @@ class UpdateInferenceLogDao(serializers.Serializer):
     input_params = serializers.CharField(required=False)
     output_details = serializers.CharField(required=False)
     total_inference_time = serializers.CharField(required=False)
+    status = serializers.CharField(required=False)
 
 class InferenceLogListFilterDao(serializers.Serializer):
     project_id = serializers.CharField(max_length=100, required=False)
     model_id = serializers.CharField(max_length=100, required=False)
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
+    status_list = serializers.ListField(child=serializers.CharField(max_length=100), required=False, default=None)
 
 
 ################ PARAM MAP ###############

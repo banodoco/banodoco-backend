@@ -1,12 +1,13 @@
+import datetime
 from rest_framework.views import APIView
-from ai_project.models import AIModel, InternalFileObject, Project, Setting
-from ai_project.v1.serializers.dao import CreateSettingDao, UUIDDao, UpdateSettingDao
+from ai_project.models import AIModel, DBLock, InternalFileObject, Project, Setting
+from ai_project.v1.serializers.dao import CreateSettingDao, LockDao, UUIDDao, UpdateSettingDao
 from ai_project.v1.serializers.dto import SettingDto
 
 from middleware.authentication import auth_required
 from middleware.response import bad_request, success, unauthorized
 from user.constants import UserType
-from user.models import User
+from django.db import transaction
 
 class ProjectSettingView(APIView):
     @auth_required('admin', 'user')
@@ -135,3 +136,26 @@ class ProjectSettingView(APIView):
         }
 
         return success(payload, 'setting fetched', True)
+    
+
+class LockAPIView(APIView):
+    # TODO: think of a proper auth to apply here
+    def get(self, request):
+        attributes = LockDao(data=request.query_params)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        with transaction.atomic():
+            if attributes.data['action'] == 'acquire':
+                lock, created = DBLock.objects.get_or_create(row_key=attributes.data['key'])
+                if lock.created_on + datetime.timedelta(minutes=1) < datetime.datetime.now():
+                    created = True
+                    
+                payload = {
+                    'data': True if created else False
+                }
+                return success(payload, 'success', True)
+            else:
+                DBLock.objects.filter(row_key=attributes.data['key']).delete()
+                return success({'data': True}, 'success', True)
+        

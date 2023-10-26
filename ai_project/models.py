@@ -48,7 +48,6 @@ class InternalFileObject(BaseModel):
     def location(self):
         return self.local_path if self.local_path else self.hosted_url
 
-
 class AIModel(BaseModel):
     name = models.CharField(max_length=255, default="")
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
@@ -65,7 +64,6 @@ class AIModel(BaseModel):
     class Meta:
         db_table = 'ai_model'
     
-
 class InferenceLog(BaseModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     model = models.ForeignKey(AIModel, on_delete=models.DO_NOTHING, null=True)
@@ -85,7 +83,6 @@ class InferenceLog(BaseModel):
             user.save()
             
         super(InferenceLog, self).save(*args, **kwargs)
-
 
 class AIModelParamMap(BaseModel):
     model = models.ForeignKey(AIModel, on_delete=models.DO_NOTHING, null=True)
@@ -108,6 +105,71 @@ class BackupTiming(BaseModel):
     def data_dump_dict(self):
         return json.loads(self.data_dump) if self.data_dump else None
 
+class Shot(BaseModel):
+    name = models.CharField(max_length=255, default="", blank=True)
+    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+    main_clip_id = models.ForeignKey(InternalFileObject, default=None, null=True)   # main clip has the correct duration
+    desc = models.TextField(default="", blank=True)
+    shot_idx = models.IntegerField()
+    duration = models.FloatField(default=2.5)
+    meta_data = models.TextField(default="", blank=True)
+    interpolated_clip_list = models.TextField(default=None, null=True)
+
+    class Meta:
+        app_label = 'backend'
+        db_table = 'shot'
+
+    @property
+    def meta_data_dict(self):
+        return json.loads(self.meta_data) if self.meta_data else None
+
+    def __init__(self, *args, **kwargs):
+        super(Shot, self).__init__(*args, **kwargs)
+        self.old_shot_idx = self.shot_idx
+        self.old_is_disabled = self.is_disabled
+        self.old_duration = self.duration
+
+    def add_interpolated_clip_list(self, clip_uuid_list):
+        cur_list = json.loads(self.interpolated_clip_list) if self.interpolated_clip_list else []
+        cur_list.extend(clip_uuid_list)
+        cur_list = list(set(cur_list))
+        self.interpolated_clip_list = json.dumps(cur_list)
+
+    def save(self, *args, **kwargs):
+        # --------------- handling shot_idx change --------------
+        # if the shot is being deleted (disabled)
+        if self.old_is_disabled != self.is_disabled and self.is_disabled:
+            shot_list = Shot.objects.filter(project_id=self.project_id, is_disabled=False).order_by('shot_idx')
+
+            # if this is disabled then shifting every shot backwards one step
+            if self.is_disabled:
+                shot_list.update(shot_idx=F('shot_idx') - 1)
+            else:
+                shot_list.update(shot_idx=F('shot_idx') + 1)
+
+        # if this is a newly created shot or assigned new shot_idx (and not disabled)
+        if (not self.id or self.old_shot_idx != self.shot_idx) and not self.is_disabled:
+            # newly created shot
+            if not self.id:
+                # if a shot already exists at this place then moving everything one step forward
+                if Shot.objects.filter(project_id=self.project_id, shot_idx=self.shot_idx, is_disabled=False).exists():
+                    shot_list = Shot.objects.filter(project_id=self.project_id, \
+                                            shot_idx__gte=self.shot_idx, is_disabled=False)
+                    shot_list.update(shot_idx=F('shot_idx') + 1)
+            elif self.old_shot_idx != self.shot_idx:
+                if self.shot_idx >= self.old_shot_idx:
+                    shots_to_move = Shot.objects.filter(project_id=self.project_id, shot_idx__gt=self.old_shot_idx, \
+                                    shot_idx__lte=self.shot_idx, is_disabled=False).order_by('shot_idx')
+                    # moving the frames between old and new index one step backwards
+                    shots_to_move.update(shot_idx=F('shot_idx') - 1)
+                else:
+                    shots_to_move = Shot.objects.filter(project_id=self.project_id, shot_idx__gte=self.shot_idx, \
+                                       shot_idx__lt=self.old_shot_idx, is_disabled=False).order_by('shot_idx')
+                    # moving frames
+                    shots_to_move.update(shot_idx=F('shot_idx') + 1, timed_clip=None, preview_video=None)
+
+        super(Shot, self).save(*args, **kwargs)
+
 class Timing(BaseModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     model = models.ForeignKey(AIModel, on_delete=models.DO_NOTHING, null=True)
@@ -119,8 +181,6 @@ class Timing(BaseModel):
     preview_video = models.ForeignKey(InternalFileObject, related_name="preview_video", on_delete=models.DO_NOTHING, null=True)
     primary_image = models.ForeignKey(InternalFileObject, related_name="primary_image", on_delete=models.DO_NOTHING, null=True)   # variant number that is currently selected (among alternative images) NONE if none is present
     custom_model_id_list = models.TextField(default=None, null=True, blank=True)    
-    frame_time = models.FloatField(default=None, null=True)
-    frame_number = models.IntegerField(default=None, null=True)
     alternative_images = models.TextField(default=None, null=True)
     custom_pipeline = models.CharField(max_length=255, default=None, null=True, blank=True)
     prompt = models.TextField(default='', blank=True)
@@ -171,31 +231,12 @@ class Timing(BaseModel):
                 if self.aux_frame_index >= self.old_aux_frame_index:
                     timings_to_move = Timing.objects.filter(project_id=self.project_id, aux_frame_index__gt=self.old_aux_frame_index, \
                                     aux_frame_index__lte=self.aux_frame_index, is_disabled=False).order_by('aux_frame_index')
-                    frame_time_list = [self.frame_time]
-                    for t in timings_to_move:
-                        frame_time_list.append(t.frame_time)
-                    # updating frame time
-                    for idx, t in enumerate(timings_to_move):
-                        Timing.objects.filter(uuid=t.uuid, is_disabled=False).update(frame_time=frame_time_list[idx])
-                    self.frame_time = frame_time_list[-1]
-
                     # moving the frames between old and new index one step backwards
                     timings_to_move.update(aux_frame_index=F('aux_frame_index') - 1)
                 else:
                     timings_to_move = Timing.objects.filter(project_id=self.project_id, aux_frame_index__gte=self.aux_frame_index, \
                                        aux_frame_index__lt=self.old_aux_frame_index, is_disabled=False).order_by('aux_frame_index')
                     
-                    frame_time_list = [self.frame_time]
-                    for t in reversed(timings_to_move):
-                        frame_time_list.append(t.frame_time)
-                    # updating frame time
-                    frame_time_list.reverse()
-                    idx = 0
-                    self.frame_time = frame_time_list[idx]
-                    idx += 1
-                    for t in timings_to_move:
-                        Timing.objects.filter(uuid=t.uuid, is_disabled=False).update(frame_time=frame_time_list[idx])
-                        idx += 1
                     # moving frames
                     timings_to_move.update(aux_frame_index=F('aux_frame_index') + 1)
                     
@@ -232,7 +273,6 @@ class Timing(BaseModel):
     def prev_timing(self):
         prev_timing = Timing.objects.filter(project=self.project, id__lt=self.id, is_disabled=False).order_by('id').first()
         return prev_timing
-
 
 class AppSetting(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
@@ -317,7 +357,6 @@ class AppSetting(BaseModel):
         from util.encryption import Encryptor
         encryptor = Encryptor()
         return encryptor.decrypt(self.stability_key) if self.stability_key else None
-
 
 class Setting(BaseModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)

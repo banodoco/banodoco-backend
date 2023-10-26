@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from ai_project.models import AIModel, InternalFileObject, Project, Timing
+from ai_project.models import AIModel, InternalFileObject, Project, Timing, Shot
 from ai_project.v1.serializers.dao import CreateTimingDao, GetProjectTimingDao, GetTimingNumberDao, ShiftTimingDao, TimingListFilterDao, UUIDDao, UpdateTimingDao
 from ai_project.v1.serializers.dto import TimingDto
 from django.core.paginator import Paginator
@@ -40,16 +40,15 @@ class FrameTimingView(APIView):
         self._clean_attributes(attributes, request.data)
         print(attributes.data)
         
-        if 'project_id' in attributes.data and attributes.data['project_id']:
-            project = Project.objects.filter(uuid=attributes.data['project_id'], is_disabled=False).first()
-            if not project:
-                return success({}, 'invalid project id', False)
+        if 'shot_id' in attributes.data and attributes.data['shot_id']:
+            shot = Shot.objects.filter(uuid=attributes.data['shot_id'], is_disabled=False).first()
+            if not shot:
+                return success({}, 'invalid shot id', False)
             
-            if str(project.user.uuid).replace('-','') != request.role_id and request.role_type != UserType.ADMIN.value:
+            if str(shot.project.user.uuid).replace('-','') != request.role_id and request.role_type != UserType.ADMIN.value:
                 return unauthorized({})
             
-            print(attributes.data)
-            attributes._data['project_id'] = project.id
+            attributes._data['shot_id'] = shot.id
         
         if 'aux_frame_index' not in attributes.data or attributes.data['aux_frame_index'] == None: 
             attributes._data['aux_frame_index'] = Timing.objects.filter(project_id=attributes.data['project_id'], is_disabled=False).count()
@@ -154,6 +153,17 @@ class FrameTimingView(APIView):
                 
                 attributes._data['primary_image_id'] = primary_image.id
 
+        if 'shot_id' in attributes.data:
+            if attributes.data['shot_id'] != None:
+                shot: Shot = Shot.objects.filter(uuid=attributes.data['shot_id'], is_disabled=False).first()
+                if not shot:
+                    return success({}, 'invalid shot uuid', False)
+                
+                if str(shot.project.user.uuid).replace('-','') != request.role_id and request.role_type != UserType.ADMIN.value:
+                    return unauthorized({})
+                
+                attributes._data['shot_id'] = shot.id
+
         if 'model_id' in attributes.data:
             if attributes.data['model_id'] != None:
                 model: AIModel = AIModel.objects.filter(uuid=attributes.data['model_id'], is_disabled=False).first()
@@ -256,12 +266,23 @@ class ProjectTimingView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
-        project = Project.objects.filter(uuid=attributes.data['project_id'], is_disabled=False).first()
-        if not project:
-            return success({}, 'invalid project uuid', False)
+        if 'project_id' in attributes.data:
+            project = Project.objects.filter(uuid=attributes.data['project_id'], is_disabled=False).first()
+            if not project:
+                return success({}, 'invalid project uuid', False)
+            
+            shot_list = Shot.objects.filter(project_id=project.id, is_disabled=False).all()
+            shot_id_list = [s.id for s in shot_list]
         
-        timing = Timing.objects.filter(project=project, \
-                    aux_frame_index=attributes.data['frame_number'], is_disabled=False).first()
+            timing = Timing.objects.filter(shot_id__in=shot_id_list, \
+                        aux_frame_index=attributes.data['frame_number'], is_disabled=False).first()
+        elif 'shot_id' in attributes.data:
+            shot = Shot.objects.filter(uuid=attributes.data['shot_id'], is_disabled=False).first()
+            if not shot:
+                return success({}, 'invalid shot uuid', False)
+            timing = Timing.objects.filter(shot=shot, \
+                        aux_frame_index=attributes.data['frame_number'], is_disabled=False).first()
+            
         if not timing:
             return success({}, 'invalid timing', False)
 
@@ -282,7 +303,10 @@ class ProjectTimingView(APIView):
         if not project:
             return success({}, 'invalid project uuid', False)
         
-        Timing.objects.filter(project=project, is_disabled=False).update(is_disabled=True)
+        shot_list = Shot.objects.filter(project_id=project.id, is_disabled=False).all()
+        shot_id_list = [s.id for s in shot_list]
+        
+        Timing.objects.filter(shot_id__in=shot_id_list, is_disabled=False).update(is_disabled=True)
         
         return success({}, 'timings deleted successfully', True)
 
@@ -298,7 +322,7 @@ class TimingNumberView(APIView):
         if not timing:
             return success({}, 'invalid timing uuid', False)
         
-        res_timing = Timing.objects.filter(project=timing.project, \
+        res_timing = Timing.objects.filter(shot=timing.shot, \
                         aux_frame_index=timing.aux_frame_index + attributes.data['distance'], project_id=timing.project_id, is_disabled=False).first()
         
         payload = {
@@ -308,21 +332,21 @@ class TimingNumberView(APIView):
         return success(payload, 'timing fetched successfully', True)
 
 # TODO: make this shifting more general depending on the usage
-class ShiftTimingViewDao(APIView):
+class ShiftTimingView(APIView):
     @auth_required('admin', 'user')
     def post(self, request):
         attributes = ShiftTimingDao(data=request.data)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
         
-        project: Project = Project.objects.filter(uuid=attributes.data['project_id'], is_disabled=False).first()
-        if not project:
-            return success({}, 'invalid project uuid', False)
+        timing = Timing.objects.filter(uuid=attributes.data['timing_uuid'], is_disabled=False).first()
+        if not timing:
+            return success({}, 'invalid timing uuid', False)
         
-        timing_list = Timing.objects.filter(project_id=project.id, \
-                                            aux_frame_index__gte=attributes.data['index_of_frame'], is_disabled=False).order_by('frame_number')
+        timing_list = Timing.objects.filter(project_id=timing.project.id, \
+                                            aux_frame_index__gte=timing.aux_frame_index, is_disabled=False).order_by('aux_frame_index')
         
-        timing_list.update(aux_frame_index=F('aux_frame_index') + 1)
+        timing_list.update(aux_frame_index=F('aux_frame_index') + attributes.data['shift'])
 
         return success({}, 'frames moved successfully', True)
     
@@ -351,6 +375,12 @@ class TimingListView(APIView):
                 return unauthorized({})
 
             attributes._data['project_id'] = project.id
+        elif 'shot' in attributes.data and attributes.data['shot']:
+            shot: Shot = Shot.objects.filter(uuid=attributes.data['shot'], is_disabled=False).first()
+            if not shot:
+                return success({}, 'invalid shot uuid', False)
+            
+            attributes._data['shot_id'] = shot.id
         
         attributes._data['is_disabled'] = False
         

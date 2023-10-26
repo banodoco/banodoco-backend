@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ai_project.models import AIModel, AppSetting, BackupTiming, InferenceLog, InternalFileObject, Project, Setting, Timing, User
+from ai_project.models import AIModel, AppSetting, BackupTiming, InferenceLog, InternalFileObject, Project, Setting, Shot, Timing, User
 
 class InternalFileDto(serializers.ModelSerializer):
     class Meta:
@@ -74,8 +74,6 @@ class TimingDto(serializers.ModelSerializer):
             "canny_image",
             "preview_video",
             "custom_model_id_list",
-            "frame_time",
-            "frame_number",
             "primary_image",
             "alternative_images",
             "custom_pipeline",
@@ -193,3 +191,26 @@ class BackupListDto(serializers.ModelSerializer):
             "note",
             "created_on"
         )
+
+
+class ShotDto(serializers.ModelSerializer):
+    timing_list = serializers.SerializerMethodField()
+    main_clip = InternalFileDto()
+
+    class Meta:
+        model = Shot
+        fields = (
+            "uuid",
+            "name",
+            "desc",
+            "shot_idx",
+            "duration",
+            "meta_data",
+            "timing_list",
+            "interpolated_clip_list",
+            "main_clip"
+        )
+    
+    def get_timing_list(self, obj):
+        timing_list = self.context.get("timing_list", [])
+        return [TimingDto(timing).data for timing in timing_list]

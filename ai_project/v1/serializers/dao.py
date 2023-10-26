@@ -185,7 +185,6 @@ class CreateTimingDao(serializers.Serializer):
     canny_image_id = serializers.CharField(max_length=100, required=False)
     preview_video_id = serializers.CharField(max_length=100, required=False)
     custom_model_id_list = serializers.CharField(max_length=100, required=False)
-    frame_time = serializers.CharField(max_length=100)
     frame_number = serializers.CharField(max_length=100, required=False)
     primary_image_id = serializers.CharField(max_length=100, required=False)
     alternative_images = serializers.CharField(max_length=100, required=False)
@@ -213,12 +212,11 @@ class UpdateTimingDao(serializers.Serializer):
     source_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     interpolated_clip_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     timed_clip_id = serializers.CharField(max_length=100, allow_null=True, required=False)
+    shot_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     mask_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     canny_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     preview_video_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     custom_model_id_list = serializers.CharField(max_length=100, allow_null=True, required=False)
-    frame_time = serializers.CharField(max_length=100, required=False)
-    frame_number = serializers.CharField(max_length=100, required=False)
     primary_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     alternative_images = serializers.CharField(max_length=None, allow_null=True, required=False)
     custom_pipeline = serializers.CharField(max_length=255, allow_null=True, allow_blank=True, required=False)
@@ -241,21 +239,45 @@ class UpdateTimingDao(serializers.Serializer):
     transformation_stage = serializers.CharField(allow_null=True, required=False)
 
 class GetProjectTimingDao(serializers.Serializer):
-    project_id = serializers.CharField(max_length=100)
+    project_id = serializers.CharField(max_length=100, required=False)
+    shot_id = serializers.CharField(max_length=100, required=False)
     frame_number = serializers.IntegerField()
+
+    def validate(self, data):
+        project_id = data.get("project_id")
+        shot_id = data.get("shot_id")
+
+        if not project_id and not shot_id:
+            raise serializers.ValidationError(
+                "At least one of project_id or shot_id is required."
+            )
+
+        return data
 
 class GetTimingNumberDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
     distance = serializers.IntegerField()
 
 class TimingListFilterDao(serializers.Serializer):
-    project_id = serializers.CharField(max_length=100)
+    project_id = serializers.CharField(max_length=100, required=False)
+    shot_id = serializers.CharField(max_length=100, required=False)
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
 
+    def validate(self, data):
+        project_id = data.get("project_id")
+        shot_id = data.get("shot_id")
+
+        if not project_id and not shot_id:
+            raise serializers.ValidationError(
+                "At least one of project_id or shot_id is required."
+            )
+
+        return data
+
 class ShiftTimingDao(serializers.Serializer):
-    project_id = serializers.CharField(max_length=100)
-    index_of_frame = serializers.IntegerField()
+    timing_uuid = serializers.CharField(max_length=100)
+    shift = serializers.IntegerField(default=1)
 
 class CreateAppSettingDao(serializers.Serializer):
     user_id = serializers.CharField(max_length=100, required=False)
@@ -342,3 +364,40 @@ class UpdateSettingDao(serializers.Serializer):
     default_animation_style = serializers.CharField(max_length=255, required=False)
     default_low_threshold = serializers.IntegerField(required=False)
     default_high_threshold = serializers.IntegerField(required=False)
+
+
+class CreateShotDao(serializers.Serializer):
+    name = serializers.CharField(max_length=100, default="")
+    desc = serializers.CharField(max_length=1024, default="")
+    duration = serializers.FloatField()
+    meta_data = serializers.CharField(max_length=None, default=None, allow_null=True)
+    project_id = serializers.CharField(max_length=100)
+
+
+class UpdateShotDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100)
+    name = serializers.CharField(max_length=100, required=False)
+    desc = serializers.CharField(max_length=1024, required=False)
+    duration = serializers.FloatField(required=False)
+    meta_data = serializers.CharField(max_length=None, required=False)
+
+class FetchShotDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100, required=False)
+    project_id = serializers.CharField(max_length=100, required=False)
+    shot_idx = serializers.IntegerField(required=False)
+
+    def validate(self, data):
+        project_id = data.get("project_id")
+        shot_idx = data.get("shot_idx")
+
+        if not project_id and not shot_idx:
+            raise serializers.ValidationError(
+                "At least one of project_id or shot_idx is required."
+            )
+
+        return data
+
+class ShotListFilterDao(serializers.Serializer):
+    project_id = serializers.CharField(max_length=100, required=False)
+    page = serializers.IntegerField(default=1)
+    data_per_page = serializers.IntegerField(default=100)

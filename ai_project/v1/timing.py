@@ -50,8 +50,8 @@ class FrameTimingView(APIView):
             
             attributes._data['shot_id'] = shot.id
         
-        if 'aux_frame_index' not in attributes.data or attributes.data['aux_frame_index'] == None: 
-            attributes._data['aux_frame_index'] = Timing.objects.filter(project_id=attributes.data['project_id'], is_disabled=False).count()
+        if 'aux_frame_index' not in attributes.data or attributes.data['aux_frame_index'] == None:
+            attributes._data['aux_frame_index'] = Timing.objects.filter(shot_id=attributes.data['shot_id'], is_disabled=False).count()
         
         if 'model_id' in attributes.data:
             if attributes.data['model_id'] != None:
@@ -71,24 +71,6 @@ class FrameTimingView(APIView):
                 attributes._data['source_image_id'] = source_image.id
         
 
-        if 'interpolated_clip_id' in attributes.data:
-            if attributes.data['interpolated_clip_id'] != None:
-                interpolated_clip = InternalFileObject.objects.filter(uuid=attributes.data['interpolated_clip_id'], is_disabled=False).first()
-                if not interpolated_clip:
-                    return success({}, 'invalid interpolated clip uuid', False)
-                
-                attributes._data['interpolated_clip_id'] = interpolated_clip.id
-        
-
-        if 'timed_clip_id' in attributes.data:
-            if attributes.data['timed_clip_id'] != None:
-                timed_clip = InternalFileObject.objects.filter(uuid=attributes.data['timed_clip_id'], is_disabled=False).first()
-                if not timed_clip:
-                    return success({}, 'invalid timed clip uuid', False)
-                
-                attributes._data['timed_clip_id'] = timed_clip.id
-        
-
         if 'mask_id' in attributes.data:
             if attributes.data['mask_id'] != None:
                 mask = InternalFileObject.objects.filter(uuid=attributes.data['mask_id'], is_disabled=False).first()
@@ -105,15 +87,6 @@ class FrameTimingView(APIView):
                     return success({}, 'invalid canny image uuid', False)
                 
                 attributes._data['canny_image_id'] = canny_image.id
-        
-
-        if 'preview_video_id' in attributes.data:
-            if attributes.data['preview_video_id'] != None:
-                preview_video = InternalFileObject.objects.filter(uuid=attributes.data['preview_video_id'], is_disabled=False).first()
-                if not preview_video:
-                    return success({}, 'invalid preview video uuid', False)
-                
-                attributes._data['preview_video_id'] = preview_video.id
         
 
         if 'primay_image_id' in attributes.data:
@@ -182,24 +155,6 @@ class FrameTimingView(APIView):
                 attributes._data['source_image_id'] = source_image.id
         
 
-        if 'interpolated_clip_id' in attributes.data:
-            if attributes.data['interpolated_clip_id'] != None:
-                interpolated_clip: InternalFileObject = InternalFileObject.objects.filter(uuid=attributes.data['interpolated_clip_id'], is_disabled=False).first()
-                if not interpolated_clip:
-                    return success({}, 'invalid interpolated clip uuid', False)
-                
-                attributes._data['interpolated_clip_id'] = interpolated_clip.id
-        
-
-        if 'timed_clip_id' in attributes.data:
-            if attributes.data['timed_clip_id'] != None:
-                timed_clip: InternalFileObject = InternalFileObject.objects.filter(uuid=attributes.data['timed_clip_id'], is_disabled=False).first()
-                if not timed_clip:
-                    return success({}, 'invalid timed clip uuid', False)
-                
-                attributes._data['timed_clip_id'] = timed_clip.id
-        
-
         if 'mask_id' in attributes.data:
             if attributes.data['mask_id'] != None:
                 mask: InternalFileObject = InternalFileObject.objects.filter(uuid=attributes.data['mask_id'], is_disabled=False).first()
@@ -216,15 +171,6 @@ class FrameTimingView(APIView):
                     return success({}, 'invalid canny image uuid', False)
                 
                 attributes._data['canny_image_id'] = canny_image.id
-        
-
-        if 'preview_video_id' in attributes.data:
-            if attributes.data['preview_video_id'] != None:
-                preview_video: InternalFileObject = InternalFileObject.objects.filter(uuid=attributes.data['preview_video_id'], is_disabled=False).first()
-                if not preview_video:
-                    return success({}, 'invalid preview video uuid', False)
-                
-                attributes._data['preview_video_id'] = preview_video.id
         
 
         if 'primay_image_id' in attributes.data:

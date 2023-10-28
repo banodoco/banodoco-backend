@@ -1,3 +1,4 @@
+import json
 from rest_framework import serializers
 
 from ai_project.models import AIModel, AppSetting, BackupTiming, InferenceLog, InternalFileObject, Project, Setting, Shot, Timing, User
@@ -51,14 +52,10 @@ class AIModelDto(serializers.ModelSerializer):
     
 
 class TimingDto(serializers.ModelSerializer):
-    project = ProjectDto()
     model = AIModelDto()
     source_image = InternalFileDto()
-    interpolated_clip = InternalFileDto()
-    timed_clip = InternalFileDto()
     mask = InternalFileDto()
     canny_image = InternalFileDto()
-    preview_video = InternalFileDto()
     primary_image  = InternalFileDto()
     
     class Meta:
@@ -68,11 +65,8 @@ class TimingDto(serializers.ModelSerializer):
             "project",
             "model",
             "source_image",
-            "interpolated_clip",
-            "timed_clip",
             "mask",
             "canny_image",
-            "preview_video",
             "custom_model_id_list",
             "primary_image",
             "alternative_images",
@@ -195,6 +189,7 @@ class BackupListDto(serializers.ModelSerializer):
 
 class ShotDto(serializers.ModelSerializer):
     timing_list = serializers.SerializerMethodField()
+    interpolated_clip_list = serializers.SerializerMethodField()
     main_clip = InternalFileDto()
 
     class Meta:
@@ -214,3 +209,8 @@ class ShotDto(serializers.ModelSerializer):
     def get_timing_list(self, obj):
         timing_list = self.context.get("timing_list", [])
         return [TimingDto(timing).data for timing in timing_list]
+    
+    def get_interpolated_clip_list(self, obj):
+        id_list = json.loads(obj.interpolated_clip_list) if obj.interpolated_clip_list else []
+        file_list = InternalFileObject.objects.filter(uuid__in=id_list, is_disabled=False).all()
+        return [InternalFileDto(file).data for file in file_list]

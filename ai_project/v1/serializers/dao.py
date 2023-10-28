@@ -176,14 +176,10 @@ class CreateAIModelParamMapDao(serializers.Serializer):
 
 ################ FRAME TIMING ###############
 class CreateTimingDao(serializers.Serializer):
-    project_id = serializers.CharField(max_length=100)
     model_id = serializers.CharField(max_length=100, required=False)
     source_image_id = serializers.CharField(max_length=100, required=False)
-    interpolated_clip_id = serializers.CharField(max_length=100, required=False)
-    timed_clip_id = serializers.CharField(max_length=100, required=False)
     mask_id = serializers.CharField(max_length=100, required=False)
     canny_image_id = serializers.CharField(max_length=100, required=False)
-    preview_video_id = serializers.CharField(max_length=100, required=False)
     custom_model_id_list = serializers.CharField(max_length=100, required=False)
     frame_number = serializers.CharField(max_length=100, required=False)
     primary_image_id = serializers.CharField(max_length=100, required=False)
@@ -215,7 +211,6 @@ class UpdateTimingDao(serializers.Serializer):
     shot_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     mask_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     canny_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
-    preview_video_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     custom_model_id_list = serializers.CharField(max_length=100, allow_null=True, required=False)
     primary_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     alternative_images = serializers.CharField(max_length=None, allow_null=True, required=False)

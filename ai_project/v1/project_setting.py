@@ -62,13 +62,6 @@ class ProjectSettingView(APIView):
                 return success({}, 'invalid audio', False)
             
             attributes._data["audio_id"] = audio.id
-    
-        if "input_video_id" in attributes.data and attributes.data["input_video_id"]:
-            video = InternalFileObject.objects.filter(uuid=attributes.data["input_video_id"], is_disabled=False).first()
-            if not video:
-                return success({}, 'invalid video', False)
-            
-            attributes._data["input_video_id"] = video.id
         
         setting = Setting.objects.create(**attributes.data)
         
@@ -112,13 +105,6 @@ class ProjectSettingView(APIView):
                 return success({}, 'invalid audio', False)
             
             attributes._data["audio_id"] = audio.id
-    
-        if "input_video_id" in attributes.data and attributes.data["input_video_id"]:
-            video = InternalFileObject.objects.filter(uuid=attributes.data["input_video_id"], is_disabled=False).first()
-            if not video:
-                return success({}, 'invalid video', False)
-            
-            attributes._data["input_video_id"] = video.id
 
         if 'model_id' in attributes.data and attributes.data['model_id']:
             model = AIModel.objects.filter(uuid=attributes.data['model_id'], is_disabled=False).first()

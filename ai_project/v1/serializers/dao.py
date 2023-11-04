@@ -184,7 +184,6 @@ class CreateTimingDao(serializers.Serializer):
     primary_image_id = serializers.CharField(max_length=100, required=False)
     alternative_images = serializers.CharField(max_length=100, required=False)
     notes = serializers.CharField(max_length=1024, required=False)
-    clip_duration = serializers.FloatField(default=0, required=False)
     aux_frame_index = serializers.IntegerField(required=False)
 
 class UpdateTimingDao(serializers.Serializer):
@@ -197,7 +196,6 @@ class UpdateTimingDao(serializers.Serializer):
     primary_image_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     alternative_images = serializers.CharField(max_length=None, allow_null=True, required=False)
     notes = serializers.CharField(max_length=1024, required=False)
-    clip_duration = serializers.FloatField(allow_null=True, required=False)
     aux_frame_index = serializers.IntegerField(required=False)
 
 class GetProjectTimingDao(serializers.Serializer):
@@ -291,9 +289,11 @@ class CreateShotDao(serializers.Serializer):
 class UpdateShotDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
     name = serializers.CharField(max_length=100, required=False)
+    shot_idx = serializers.IntegerField(required=False)
     desc = serializers.CharField(max_length=1024, required=False)
     duration = serializers.FloatField(required=False)
     meta_data = serializers.CharField(max_length=None, required=False)
+    main_clip_id = serializers.CharField(max_length=100, required=False)
 
 class FetchShotDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100, required=False)
@@ -315,3 +315,8 @@ class ShotListFilterDao(serializers.Serializer):
     project_id = serializers.CharField(max_length=100, required=False)
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
+
+
+class AddShotClipDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100)
+    interpolated_clip_id = serializers.CharField(max_length=None)

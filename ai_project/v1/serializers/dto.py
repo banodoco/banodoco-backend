@@ -49,7 +49,23 @@ class AIModelDto(serializers.ModelSerializer):
 
     def get_user_uuid(self, obj):
         return obj.user.uuid
-    
+
+class BasicShotDto(serializers.ModelSerializer):
+    project = ProjectDto()
+
+    class Meta:
+        model = Shot
+        fields = (
+            "uuid",
+            "name",
+            "project",
+            "desc",
+            "shot_idx",
+            "project",
+            "duration",
+            "meta_data",
+        )
+
 
 class TimingDto(serializers.ModelSerializer):
     model = AIModelDto()
@@ -57,12 +73,11 @@ class TimingDto(serializers.ModelSerializer):
     mask = InternalFileDto()
     canny_image = InternalFileDto()
     primary_image  = InternalFileDto()
-    
+    shot = BasicShotDto()
     class Meta:
         model = Timing
         fields = (
             "uuid",
-            "project",
             "model",
             "source_image",
             "mask",
@@ -70,15 +85,14 @@ class TimingDto(serializers.ModelSerializer):
             "primary_image",
             "alternative_images",
             "notes",
-            "clip_duration",
             "aux_frame_index",
             "created_on",
+            "shot"
         )
 
 
 class AppSettingDto(serializers.ModelSerializer):
     user = UserDto()
-
     class Meta:
         model = AppSetting
         fields = (
@@ -156,6 +170,7 @@ class ShotDto(serializers.ModelSerializer):
     timing_list = serializers.SerializerMethodField()
     interpolated_clip_list = serializers.SerializerMethodField()
     main_clip = InternalFileDto()
+    project = ProjectDto()
 
     class Meta:
         model = Shot
@@ -168,12 +183,15 @@ class ShotDto(serializers.ModelSerializer):
             "meta_data",
             "timing_list",
             "interpolated_clip_list",
-            "main_clip"
+            "main_clip",
+            "project"
         )
     
     def get_timing_list(self, obj):
         timing_list = self.context.get("timing_list", [])
-        return [TimingDto(timing).data for timing in timing_list]
+        timing_list = [TimingDto(timing).data for timing in timing_list if str(timing.shot.uuid) == str(obj.uuid)]
+        timing_list.sort(key=lambda x: x['aux_frame_index'])
+        return timing_list
     
     def get_interpolated_clip_list(self, obj):
         id_list = json.loads(obj.interpolated_clip_list) if obj.interpolated_clip_list else []

@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
-from ai_project.models import Project, Shot, Timing
-from ai_project.v1.serializers.dao import CreateShotDao, FetchShotDao, ShotListFilterDao, UUIDDao, UpdateShotDao
+from ai_project.models import InternalFileObject, Project, Shot, Timing
+from ai_project.v1.serializers.dao import AddShotClipDao, CreateShotDao, FetchShotDao, ShotListFilterDao, UUIDDao, UpdateShotDao
 from ai_project.v1.serializers.dto import ShotDto
 from django.core.paginator import Paginator
 
@@ -45,6 +45,12 @@ class ShotCRUDView(APIView):
         
         shot_idx = Shot.objects.filter(project_id=project.id, is_disabled=False).count() + 1
         attributes._data['shot_idx'] = shot_idx
+        if not ('name' in attributes.data and attributes.data['name']):
+            attributes._data['name'] = "Shot " + str(shot_idx)
+        else:
+            prev_shot = Shot.objects.filter(project_id=project.id, name=attributes.data['name'], is_disabled=False).first()
+            if prev_shot:
+                return success({}, 'shot name already exists', False)
 
         shot = Shot.objects.create(**attributes.data)
         
@@ -66,6 +72,17 @@ class ShotCRUDView(APIView):
         shot = Shot.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
         if not shot:
             return success({}, 'invalid shot uuid', False)
+        
+        if 'name' in attributes.data and attributes.data['name']: 
+            prev_shot = Shot.objects.filter(project_id=shot.project.id, name=attributes.data['name'], is_disabled=False).first()
+            if prev_shot:
+                return success({}, 'shot name already exists', False)
+        
+        if 'main_clip_id' in attributes.data and attributes.data['main_clip_id']:
+            video_clip = InternalFileObject.objects.filter(uuid=attributes.data['main_clip_id'], is_disabled=False).first()
+            if not video_clip:
+                return success({}, 'invalid video clip uuid', False)
+            attributes._data['main_clip_id'] = video_clip.id
         
         for k,v in attributes.data.items():
             setattr(shot, k, v)
@@ -94,7 +111,26 @@ class ShotCRUDView(APIView):
         shot.save()
         
         return success({}, 'shot deleted successfully', True)
-    
+
+class ShotClipView(APIView):
+    @auth_required('user', 'admin')
+    def post(self, request):
+        attributes = AddShotClipDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        shot = Shot.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        if not shot:
+            return success({}, 'invalid shot uuid', False)
+        
+        video_clip = InternalFileObject.objects.filter(uuid=attributes.data['interpolated_clip_id'], is_disabled=False).first()
+        if not video_clip:
+            return success({}, 'invalid video clip uuid', False)
+
+        shot.add_interpolated_clip_list([video_clip.uuid.hex])
+        shot.save()
+
+        return success({}, 'shot clip added successfully', True)
 
 class ShotListView(APIView):
     def __init__(self):
@@ -115,7 +151,7 @@ class ShotListView(APIView):
         print(attributes.data)
         attributes._data['is_disabled'] = False
         
-        self.shot_list = Shot.objects.filter(**attributes.data).order_by('aux_frame_index').all()
+        self.shot_list = Shot.objects.filter(**attributes.data).order_by('aux_frame_index').order_by('shot_idx').all()
 
         paginator = Paginator(self.shot_list, self.data_per_page)
         if page > paginator.num_pages or page < 1:

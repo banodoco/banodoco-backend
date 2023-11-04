@@ -107,8 +107,8 @@ class BackupTiming(BaseModel):
 
 class Shot(BaseModel):
     name = models.CharField(max_length=255, default="", blank=True)
-    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
-    main_clip_id = models.ForeignKey(InternalFileObject, default=None, null=True)   # main clip has the correct duration
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    main_clip = models.ForeignKey(InternalFileObject, default=None, null=True, on_delete=models.DO_NOTHING)   # main clip has the correct duration
     desc = models.TextField(default="", blank=True)
     shot_idx = models.IntegerField()
     duration = models.FloatField(default=2.5)
@@ -116,7 +116,6 @@ class Shot(BaseModel):
     interpolated_clip_list = models.TextField(default=None, null=True)
 
     class Meta:
-        app_label = 'backend'
         db_table = 'shot'
 
     @property
@@ -165,6 +164,8 @@ class Shot(BaseModel):
                 else:
                     shots_to_move = Shot.objects.filter(project_id=self.project_id, shot_idx__gte=self.shot_idx, \
                                        shot_idx__lt=self.old_shot_idx, is_disabled=False).order_by('shot_idx')
+                    
+                    shots_to_move.update(shot_idx=F('shot_idx') + 1)
 
         super(Shot, self).save(*args, **kwargs)
 
@@ -174,7 +175,7 @@ class Timing(BaseModel):
     mask = models.ForeignKey(InternalFileObject, related_name="mask", on_delete=models.DO_NOTHING, null=True)
     canny_image = models.ForeignKey(InternalFileObject, related_name="canny_image", on_delete=models.DO_NOTHING, null=True)
     primary_image = models.ForeignKey(InternalFileObject, related_name="primary_image", on_delete=models.DO_NOTHING, null=True) 
-    shot_id = models.ForeignKey(Shot, on_delete=models.CASCADE, null=True) 
+    shot = models.ForeignKey(Shot, on_delete=models.CASCADE, null=True)
     alternative_images = models.TextField(default=None, null=True)
     notes = models.TextField(default="", blank=True)
     clip_duration = models.FloatField(default=None, null=True)     # clip duration of the timed_clip
@@ -189,9 +190,11 @@ class Timing(BaseModel):
         self.old_aux_frame_index = self.aux_frame_index
 
     def save(self, *args, **kwargs):
+        # ------ handling aux_frame_index ------
+        # if the frame is being deleted (disabled)
         if self.old_is_disabled != self.is_disabled and self.is_disabled:
             timing_list = Timing.objects.filter(shot_id=self.shot_id, \
-                                            aux_frame_index__gte=self.aux_frame_index, is_disabled=False).order_by('frame_number')
+                                            aux_frame_index__gte=self.aux_frame_index, is_disabled=False).order_by('aux_frame_index')
             
             # shifting aux_frame_index of all frames after this frame one backwards
             if self.is_disabled:
@@ -212,14 +215,23 @@ class Timing(BaseModel):
                 if self.aux_frame_index >= self.old_aux_frame_index:
                     timings_to_move = Timing.objects.filter(shot_id=self.shot_id, aux_frame_index__gt=self.old_aux_frame_index, \
                                     aux_frame_index__lte=self.aux_frame_index, is_disabled=False).order_by('aux_frame_index')
+
                     # moving the frames between old and new index one step backwards
                     timings_to_move.update(aux_frame_index=F('aux_frame_index') - 1)
                 else:
                     timings_to_move = Timing.objects.filter(shot_id=self.shot_id, aux_frame_index__gte=self.aux_frame_index, \
                                        aux_frame_index__lt=self.old_aux_frame_index, is_disabled=False).order_by('aux_frame_index')
-                    
-                    # moving frames
                     timings_to_move.update(aux_frame_index=F('aux_frame_index') + 1)
+
+        # --------------- handling shot change -------------------
+        if not self.is_disabled and self.id and self.old_shot != self.shot:
+            # moving all frames ahead of this frame, one step backwards
+            timing_list = Timing.objects.filter(shot_id=self.old_shot.id, \
+                                               aux_frame_index__gt=self.aux_frame_index, is_disabled=False).order_by('aux_frame_index')
+            # changing the aux_frame_index of this frame to be the last one in the new shot
+            new_index = Timing.objects.filter(shot_id=self.shot.id, is_disabled=False).count()
+            self.aux_frame_index = new_index
+            timing_list.update(aux_frame_index=F('aux_frame_index') - 1)
 
         super().save(*args, **kwargs)
 

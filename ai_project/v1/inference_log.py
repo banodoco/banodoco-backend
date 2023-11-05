@@ -179,10 +179,10 @@ class InferenceLogListView(APIView):
 
         if "status_list" in attributes.data and attributes.data['status_list']:
             attributes._data['status__in'] = attributes.data['status_list']
-            del attributes.d_data['status_list']
+            del attributes._data['status_list']
             self.log_list = InferenceLog.objects.filter(**attributes.data).order_by('-created_on').all()
-
         else:
+            del attributes._data['status_list']
             self.log_list = InferenceLog.objects.filter(**attributes.data).exclude(status="").order_by('-created_on').all()
 
         self.log_list = self.log_list.exclude(model_id=None)      # hackish sol to exclude non-image/video logs

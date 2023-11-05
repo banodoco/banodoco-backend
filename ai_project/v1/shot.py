@@ -131,6 +131,56 @@ class ShotClipView(APIView):
         shot.save()
 
         return success({}, 'shot clip added successfully', True)
+    
+class ShotDuplicateView(APIView):
+    @auth_required('user', 'admin')
+    def post(self, request):
+        attributes = UUIDDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        shot: Shot = Shot.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        if not shot:
+            return success({}, 'invalid shot uuid', False)
+        
+        shot_number = Shot.objects.filter(project_id=shot.project.id, is_disabled=False).count() + 1
+        shot_data = {
+            "name" : shot.name + " (copy)",
+            "desc" : shot.desc,
+            "shot_idx" : shot_number,
+            "duration" : shot.duration,
+            "meta_data" : shot.meta_data,
+            "project_id" : shot.project.id
+        }
+
+        new_shot = Shot.objects.create(**shot_data)
+        
+        timing_list = Timing.objects.filter(shot_id=shot.id, is_disabled=False).all()
+        new_timing_list = []
+        for timing in timing_list:
+            data = {
+                "model_id": timing.model_id,
+                "source_image_id": timing.source_image_id,
+                "mask_id": timing.mask_id,
+                "canny_image_id": timing.canny_image_id,
+                "primary_image_id": timing.primary_image_id,
+                "shot_id": new_shot.id,
+                "alternative_images": timing.alternative_images,
+                "notes": timing.notes,
+                "clip_duration": timing.clip_duration,
+                "aux_frame_index": timing.aux_frame_index,
+            }
+
+            new_timing = Timing.objects.create(**data)
+            new_timing_list.append(new_timing)
+        
+        context = {'timing_list': new_timing_list}
+        
+        payload = {
+            'data': ShotDto(new_shot, context=context).data
+        }
+
+        return success(payload, 'shot duplicated successfully', True)
 
 class ShotListView(APIView):
     def __init__(self):
@@ -148,10 +198,21 @@ class ShotListView(APIView):
         self.data_per_page = attributes.data["data_per_page"]
         del attributes._data["data_per_page"]
 
+        if 'project_id' in attributes.data and attributes.data['project_id']:
+            project: Project = Project.objects.filter(uuid=attributes.data['project_id'], is_disabled=False).first()
+            if not project:
+                return success({}, 'invalid project uuid', False)
+            
+            attributes._data['project_id'] = project.id
+
         print(attributes.data)
         attributes._data['is_disabled'] = False
         
-        self.shot_list = Shot.objects.filter(**attributes.data).order_by('aux_frame_index').order_by('shot_idx').all()
+        self.shot_list = Shot.objects.filter(**attributes.data).order_by('shot_idx').all()
+        timing_list = Timing.objects.filter(is_disabled=False).all()
+        if 'project_id' in attributes.data:
+            timing_list = timing_list.filter(shot__project_id=attributes.data['project_id'])
+        context = {'timing_list': timing_list}
 
         paginator = Paginator(self.shot_list, self.data_per_page)
         if page > paginator.num_pages or page < 1:
@@ -162,7 +223,7 @@ class ShotListView(APIView):
             "page": page,
             "total_pages": paginator.num_pages,
             "count": paginator.count,
-            "data": ShotDto(paginator.page(page), many=True).data,
+            "data": ShotDto(paginator.page(page), many=True, context=context).data,
         }
 
         return success(payload, "timing list fetched successfully", True)

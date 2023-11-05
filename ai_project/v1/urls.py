@@ -5,7 +5,7 @@ from ai_project.v1.file import FileListView, FileUUIDListView, FileView, UploadF
 from ai_project.v1.inference_log import InferenceLogListView, InferenceLogView
 from ai_project.v1.project import ProjectListView, ProjectView
 from ai_project.v1.project_setting import LockAPIView, ProjectSettingView
-from ai_project.v1.shot import ShotCRUDView, ShotClipView, ShotListView
+from ai_project.v1.shot import ShotCRUDView, ShotClipView, ShotDuplicateView, ShotListView
 
 from ai_project.v1.timing import FrameTimingView, ProjectTimingView, ShiftTimingView, TimingListView, TimingNumberView
 
@@ -40,5 +40,6 @@ urlpatterns = [
     # shot
     url(r'^shot$', ShotCRUDView.as_view()),
     url(r'^shot/list$', ShotListView.as_view()),
-    url(r'^shot/interpolated-clip$', ShotClipView.as_view())
+    url(r'^shot/interpolated-clip$', ShotClipView.as_view()),
+    url(r'^shot/duplicate$', ShotDuplicateView.as_view()),
 ]

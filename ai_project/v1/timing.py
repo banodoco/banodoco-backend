@@ -320,7 +320,10 @@ class TimingListView(APIView):
             if str(project.user.uuid).replace('-','') != request.role_id and request.role_type != UserType.ADMIN.value:
                 return unauthorized({})
 
-            attributes._data['project_id'] = project.id
+            shot_list: Shot = Shot.objects.filter(project_id=project.id, is_disabled=False).all()
+            del attributes._data['project_id']
+            attributes._data['shot_id__in'] = [s.id for s in shot_list]
+            
         elif 'shot' in attributes.data and attributes.data['shot']:
             shot: Shot = Shot.objects.filter(uuid=attributes.data['shot'], is_disabled=False).first()
             if not shot:

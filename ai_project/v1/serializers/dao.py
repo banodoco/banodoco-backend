@@ -179,6 +179,7 @@ class CreateTimingDao(serializers.Serializer):
     model_id = serializers.CharField(max_length=100, required=False)
     source_image_id = serializers.CharField(max_length=100, required=False)
     mask_id = serializers.CharField(max_length=100, required=False)
+    shot_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     canny_image_id = serializers.CharField(max_length=100, required=False)
     frame_number = serializers.CharField(max_length=100, required=False)
     primary_image_id = serializers.CharField(max_length=100, required=False)
@@ -279,10 +280,10 @@ class UpdateSettingDao(serializers.Serializer):
 
 
 class CreateShotDao(serializers.Serializer):
-    name = serializers.CharField(max_length=100, default="")
-    desc = serializers.CharField(max_length=1024, default="")
+    name = serializers.CharField(max_length=100, default="", allow_blank=True)
+    desc = serializers.CharField(max_length=1024, default="", allow_blank=True)
     duration = serializers.FloatField()
-    meta_data = serializers.CharField(max_length=None, default=None, allow_null=True)
+    meta_data = serializers.CharField(max_length=None, default=None, allow_null=True, allow_blank=True)
     project_id = serializers.CharField(max_length=100)
 
 

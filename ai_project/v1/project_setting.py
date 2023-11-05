@@ -1,4 +1,5 @@
 import datetime
+from pytz import timezone
 from rest_framework.views import APIView
 from ai_project.models import AIModel, DBLock, InternalFileObject, Project, Setting
 from ai_project.v1.serializers.dao import CreateSettingDao, LockDao, UUIDDao, UpdateSettingDao
@@ -134,7 +135,7 @@ class LockAPIView(APIView):
         with transaction.atomic():
             if attributes.data['action'] == 'acquire':
                 lock, created = DBLock.objects.get_or_create(row_key=attributes.data['key'])
-                if lock.created_on + datetime.timedelta(minutes=1) < datetime.datetime.now():
+                if lock.created_on + datetime.timedelta(minutes=1) < datetime.datetime.now(tz=timezone('UTC')):
                     created = True
                     
                 payload = {

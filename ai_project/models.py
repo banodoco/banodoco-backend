@@ -188,6 +188,7 @@ class Timing(BaseModel):
         super(Timing, self).__init__(*args, **kwargs)
         self.old_is_disabled = self.is_disabled
         self.old_aux_frame_index = self.aux_frame_index
+        self.old_shot = self.shot
 
     def save(self, *args, **kwargs):
         # ------ handling aux_frame_index ------

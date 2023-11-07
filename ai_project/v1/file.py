@@ -207,7 +207,7 @@ class FileListView(APIView):
         return success(payload, "file list fetched successfully", True)
 
 class UploadFileView(APIView):
-    # @auth_required('admin', 'data_entry', 'user')
+    @auth_required('admin', 'data_entry', 'user')
     def post(self, request):
         attributes = UploadFileDao(data=request.data)
         if not attributes.is_valid():

@@ -2,11 +2,12 @@ from rest_framework.views import APIView
 from django.db import models
 from django.core.paginator import Paginator
 from ai_project.constants import S3_FOLDER_PATH
-from ai_project.models import InternalFileObject, Project
+from ai_project.models import InferenceLog, InternalFileObject, Project
 from ai_project.v1.serializers.dao import (
     CreateFileDao,
     FileListFilterDao,
     FileUUIDListDao,
+    LogUUIDListDao,
     UUIDDao,
     UpdateFileDao,
     UploadFileDao,
@@ -147,6 +148,20 @@ class FileUUIDListView(APIView):
         }
 
         return success(payload, "success", True)
+    
+    @auth_required('admin', 'user')
+    def post(self, request):
+        attributes = LogUUIDListDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        inference_log_list = InferenceLog.objects.filter(uuid__in=attributes.data['log_uuid_list'], is_disabled=False).all()
+        file_list = InternalFileObject.objects.filter(inference_log__uuid__in=[str(log.uuid) for log in inference_log_list], is_disabled=False).all()
+        payload = {
+            'data': InternalFileDto(file_list, many=True).data
+        }
+
+        return success(payload, 'file list fetched successfully', True)
 
 class FileListView(APIView):
     def __init__(self):
@@ -192,7 +207,7 @@ class FileListView(APIView):
         return success(payload, "file list fetched successfully", True)
 
 class UploadFileView(APIView):
-    # @auth_required('admin', 'data_entry', 'user')
+    @auth_required('admin', 'data_entry', 'user')
     def post(self, request):
         attributes = UploadFileDao(data=request.data)
         if not attributes.is_valid():

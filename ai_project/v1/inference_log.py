@@ -177,7 +177,15 @@ class InferenceLogListView(APIView):
 
         attributes._data["is_disabled"] = False
 
-        self.log_list = InferenceLog.objects.filter(**attributes.data).all()
+        if "status_list" in attributes.data and attributes.data['status_list']:
+            attributes._data['status__in'] = attributes.data['status_list']
+            del attributes._data['status_list']
+            self.log_list = InferenceLog.objects.filter(**attributes.data).order_by('-created_on').all()
+        else:
+            del attributes._data['status_list']
+            self.log_list = InferenceLog.objects.filter(**attributes.data).exclude(status="").order_by('-created_on').all()
+
+        self.log_list = self.log_list.exclude(model_id=None)      # hackish sol to exclude non-image/video logs
 
         paginator = Paginator(self.log_list, self.data_per_page)
         if page > paginator.num_pages or page < 1:

@@ -1,12 +1,12 @@
 from rest_framework.views import APIView
-from ai_project.models import AIModel, InternalFileObject, Project, Setting
-from ai_project.v1.serializers.dao import CreateSettingDao, UUIDDao, UpdateSettingDao
+from ai_project.models import AIModel, DBLock, InternalFileObject, Project, Setting
+from ai_project.v1.serializers.dao import CreateSettingDao, LockDao, UUIDDao, UpdateSettingDao
 from ai_project.v1.serializers.dto import SettingDto
 
 from middleware.authentication import auth_required
 from middleware.response import bad_request, success, unauthorized
 from user.constants import UserType
-from user.models import User
+from util.lock import use_lock
 
 class ProjectSettingView(APIView):
     @auth_required('admin', 'user')
@@ -61,13 +61,6 @@ class ProjectSettingView(APIView):
                 return success({}, 'invalid audio', False)
             
             attributes._data["audio_id"] = audio.id
-    
-        if "input_video_id" in attributes.data and attributes.data["input_video_id"]:
-            video = InternalFileObject.objects.filter(uuid=attributes.data["input_video_id"], is_disabled=False).first()
-            if not video:
-                return success({}, 'invalid video', False)
-            
-            attributes._data["input_video_id"] = video.id
         
         setting = Setting.objects.create(**attributes.data)
         
@@ -111,13 +104,6 @@ class ProjectSettingView(APIView):
                 return success({}, 'invalid audio', False)
             
             attributes._data["audio_id"] = audio.id
-    
-        if "input_video_id" in attributes.data and attributes.data["input_video_id"]:
-            video = InternalFileObject.objects.filter(uuid=attributes.data["input_video_id"], is_disabled=False).first()
-            if not video:
-                return success({}, 'invalid video', False)
-            
-            attributes._data["input_video_id"] = video.id
 
         if 'model_id' in attributes.data and attributes.data['model_id']:
             model = AIModel.objects.filter(uuid=attributes.data['model_id'], is_disabled=False).first()
@@ -135,3 +121,14 @@ class ProjectSettingView(APIView):
         }
 
         return success(payload, 'setting fetched', True)
+    
+
+class LockAPIView(APIView):
+    @auth_required('admin', 'user')
+    def get(self, request):
+        attributes = LockDao(data=request.query_params)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+        
+        res = use_lock(attributes.data['action'], attributes.data['key'])
+        return success(*res)

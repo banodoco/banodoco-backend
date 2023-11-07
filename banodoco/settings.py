@@ -204,14 +204,14 @@ AUTH_PASSWORD_VALIDATORS = [
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-sentry_sdk.init(
-    environment=SERVER,
-    dsn="https://fa44e9e4d98531f323f719657d39b438@o4505748407255040.ingest.sentry.io/4505832580120576",
-    integrations=[DjangoIntegration()],
-    send_default_pii=True,
-    traces_sample_rate=0,
-    profiles_sample_rate=0,
-)
+# sentry_sdk.init(
+#     environment=SERVER,
+#     dsn="https://fa44e9e4d98531f323f719657d39b438@o4505748407255040.ingest.sentry.io/4505832580120576",
+#     integrations=[DjangoIntegration()],
+#     send_default_pii=True,
+#     traces_sample_rate=0,
+#     profiles_sample_rate=0,
+# )
 
 
 LANGUAGE_CODE = 'en-us'

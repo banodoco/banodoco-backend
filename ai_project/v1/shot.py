@@ -25,8 +25,11 @@ class ShotCRUDView(APIView):
             
             shot = Shot.objects.filter(project_id=project.id, shot_idx=attributes.data['shot_idx'], is_disabled=False).first()
 
+        timing_list = Timing.objects.filter(shot_id=shot.id, is_disabled=False).order_by('aux_frame_index').all()
+        context = {'timing_list': timing_list}
+
         payload = {
-            'data': ShotDto(shot).data
+            'data': ShotDto(shot, context=context).data
         }
 
         return success(payload, 'shot fetched successfully', True)
@@ -54,8 +57,8 @@ class ShotCRUDView(APIView):
 
         shot = Shot.objects.create(**attributes.data)
         
-        timing_list = Timing.objects.filter(is_disabled=False).all()
-        context = {'timing_list': timing_list}
+        # this shot won't have any timings
+        context = {'timing_list': []}
         
         payload = {
             'data': ShotDto(shot, context=context).data
@@ -88,7 +91,7 @@ class ShotCRUDView(APIView):
             setattr(shot, k, v)
         shot.save()
         
-        timing_list = Timing.objects.filter(is_disabled=False).all()
+        timing_list = Timing.objects.filter(shot_id=shot.id, is_disabled=False).all()
         context = {'timing_list': timing_list}
         
         payload = {

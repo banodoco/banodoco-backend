@@ -189,7 +189,11 @@ class ShotDto(serializers.ModelSerializer):
     
     def get_timing_list(self, obj):
         timing_list = self.context.get("timing_list", [])
-        timing_list = [TimingDto(timing).data for timing in timing_list if str(timing.shot.uuid) == str(obj.uuid)]
+        timing_list = []
+        for timing in timing_list:
+            if timing and timing.shot and str(timing.shot.uuid) == str(obj.uuid):
+                timing_list.append(TimingDto(timing).data)
+        
         timing_list.sort(key=lambda x: x['aux_frame_index'])
         return timing_list
     

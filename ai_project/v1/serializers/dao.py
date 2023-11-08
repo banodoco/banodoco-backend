@@ -8,9 +8,20 @@ from ai_project.constants import (
     InternalFileType,
 )
 
-
 class UUIDDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
+
+class GetAIModelDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100, required=False)
+    replicate_url = serializers.CharField(max_length=100, required=False)
+
+    def validate(self, data):
+        if not data.get("uuid") and not data.get("replicate_url"):
+            raise serializers.ValidationError(
+                "Either uuid or replicate_url is required."
+            )
+
+        return data
 
 class OptionalUUIDDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100, required=False)
@@ -144,7 +155,7 @@ class AIModelListFilterDao(serializers.Serializer):
 ############### INFERENCE LOG ###############
 class CreateInferenceLogDao(serializers.Serializer):
     project_id = serializers.CharField(max_length=100, required=False)
-    model_id = serializers.CharField(max_length=100, required=False)
+    model_id = serializers.CharField(max_length=100, allow_null=True, required=False)
     input_params = serializers.CharField(required=False)
     output_details = serializers.CharField(required=False)
     total_inference_time = serializers.CharField(required=False)

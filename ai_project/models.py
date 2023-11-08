@@ -25,29 +25,6 @@ class DBLock(BaseModel):
     class Meta:
         db_table = 'lock'
 
-
-class InternalFileObject(BaseModel):
-    name = models.TextField(default="")
-    type = models.CharField(max_length=255, default="")     # image, video, audio
-    local_path = models.TextField(default="")
-    hosted_url = models.TextField(default="")
-    tag = models.CharField(max_length=255,default="")  # background_image, mask_image, canny_image etc..
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, default=None, null=True)
-
-    class Meta:
-        db_table = 'file'
-
-    def save(self, *args, **kwargs):
-        # if the online url is not an s3 url and it's a production environment then we need to save the file in s3
-        if self.hosted_url and not is_s3_image_url(self.hosted_url):
-            self.hosted_url = generate_s3_url(self.hosted_url)
-            
-        super(InternalFileObject, self).save(*args, **kwargs)
-
-    @property
-    def location(self):
-        return self.local_path if self.local_path else self.hosted_url
-
 class AIModel(BaseModel):
     name = models.CharField(max_length=255, default="")
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True)
@@ -83,6 +60,30 @@ class InferenceLog(BaseModel):
             user.save()
             
         super(InferenceLog, self).save(*args, **kwargs)
+
+
+class InternalFileObject(BaseModel):
+    name = models.TextField(default="")
+    type = models.CharField(max_length=255, default="")     # image, video, audio
+    local_path = models.TextField(default="")
+    hosted_url = models.TextField(default="")
+    tag = models.CharField(max_length=255,default="")  # background_image, mask_image, canny_image etc..
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, default=None, null=True)
+    inference_log = models.ForeignKey(InferenceLog, on_delete=models.SET_NULL, default=None, null=True)
+
+    class Meta:
+        db_table = 'file'
+
+    def save(self, *args, **kwargs):
+        # if the online url is not an s3 url and it's a production environment then we need to save the file in s3
+        if self.hosted_url and not is_s3_image_url(self.hosted_url):
+            self.hosted_url = generate_s3_url(self.hosted_url)
+            
+        super(InternalFileObject, self).save(*args, **kwargs)
+
+    @property
+    def location(self):
+        return self.local_path if self.local_path else self.hosted_url
 
 class AIModelParamMap(BaseModel):
     model = models.ForeignKey(AIModel, on_delete=models.DO_NOTHING, null=True)

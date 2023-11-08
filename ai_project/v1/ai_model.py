@@ -5,6 +5,7 @@ from ai_project.models import AIModel
 from ai_project.v1.serializers.dao import (
     AIModelListFilterDao,
     CreateAIModelDao,
+    GetAIModelDao,
     UUIDDao,
     UpdateAIModelDao,
 )
@@ -20,21 +21,23 @@ from user.models import User
 class AIModelView(APIView):
     @auth_required("admin", "user")
     def get(self, request):
-        attributes = UUIDDao(data=request.query_params)
+        attributes = GetAIModelDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
+        
+        current_user = User.objects.filter(uuid=request.role_id, is_disabled=False).first()
+        if not current_user:
+            return unauthorized({})
 
-        ai_model = AIModel.objects.filter(
-            uuid=attributes.data["uuid"], is_disabled=False
-        ).first()
+        if 'uuid' in attributes.data and attributes.data['uuid']:
+            ai_model = AIModel.objects.filter(
+                uuid=attributes.data["uuid"], user_id=current_user.id, is_disabled=False
+            ).first()
+        else:
+            ai_model = AIModel.objects.filter(replicate_url=attributes.data['replicate_url'], user_id=current_user.id, is_disabled=False).first()
+
         if not ai_model:
             return success({}, "invalid model uuid", False)
-
-        if (
-            str(ai_model.user.uuid).replace('-','') != request.role_id
-            and request.role_type != UserType.ADMIN.value
-        ):
-            return unauthorized({})
 
         payload = {"data": AIModelDto(ai_model).data}
 

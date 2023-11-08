@@ -74,6 +74,7 @@ class TimingDto(serializers.ModelSerializer):
     canny_image = InternalFileDto()
     primary_image  = InternalFileDto()
     shot = BasicShotDto()
+
     class Meta:
         model = Timing
         fields = (
@@ -189,13 +190,13 @@ class ShotDto(serializers.ModelSerializer):
     
     def get_timing_list(self, obj):
         timing_list = self.context.get("timing_list", [])
-        timing_list = []
+        res = []
         for timing in timing_list:
             if timing and timing.shot and str(timing.shot.uuid) == str(obj.uuid):
-                timing_list.append(TimingDto(timing).data)
+                res.append(TimingDto(timing).data)
         
-        timing_list.sort(key=lambda x: x['aux_frame_index'])
-        return timing_list
+        res.sort(key=lambda x: x['aux_frame_index'])
+        return res
     
     def get_interpolated_clip_list(self, obj):
         id_list = json.loads(obj.interpolated_clip_list) if obj.interpolated_clip_list else []

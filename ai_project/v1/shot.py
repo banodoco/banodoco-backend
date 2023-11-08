@@ -226,7 +226,7 @@ class ShotListView(APIView):
             "page": page,
             "total_pages": paginator.num_pages,
             "count": paginator.count,
-            "data": ShotDto(paginator.page(page), many=True, context=context).data,
+            "data": ShotDto(paginator.page(page), context=context, many=True).data,
         }
 
         return success(payload, "timing list fetched successfully", True)

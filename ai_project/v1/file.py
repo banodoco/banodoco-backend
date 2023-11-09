@@ -75,6 +75,13 @@ class FileView(APIView):
             print(attributes.data)
             attributes._data["project_id"] = project.id
 
+        if 'inference_log_id' in attributes.data and attributes.data['inference_log_id']:
+            inference_log = InferenceLog.objects.filter(uuid=attributes.data['inference_log_id'], is_disabled=False).first()
+            if not inference_log:
+                return success({}, 'invalid log id', False)
+            
+            attributes._data['inference_log_id'] = inference_log.id
+
         for k, v in attributes.data.items():
             setattr(file, k, v)
 
@@ -125,6 +132,13 @@ class FileView(APIView):
 
             print(attributes.data)
             attributes._data["project_id"] = project.id
+
+        if 'inference_log_id' in attributes.data and attributes.data['inference_log_id']:
+            inference_log = InferenceLog.objects.filter(uuid=attributes.data['inference_log_id'], is_disabled=False).first()
+            if not inference_log:
+                return success({}, 'invalid log id', False)
+            
+            attributes._data['inference_log_id'] = inference_log.id
 
         file = InternalFileObject.objects.create(**attributes.data)
 

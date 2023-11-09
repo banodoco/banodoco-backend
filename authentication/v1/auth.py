@@ -48,6 +48,6 @@ class RefreshTokenView(APIView):
             refresh_token=refresh_token,
         )
 
-        payload = {"token": token, "refresh_token": refresh_token}
+        payload = {"token": token, "refresh_token": refresh_token, "user": UserDto(user).data}
 
         return success(payload, "token refreshed successfully", True)

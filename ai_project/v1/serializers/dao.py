@@ -14,6 +14,7 @@ class UUIDDao(serializers.Serializer):
 class GetAIModelDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100, required=False)
     replicate_url = serializers.CharField(max_length=100, required=False)
+    user_id = serializers.CharField(max_length=100, required=False)
 
     def validate(self, data):
         if not data.get("uuid") and not data.get("replicate_url"):
@@ -52,6 +53,7 @@ class CreateFileDao(serializers.Serializer):
     hosted_url = serializers.CharField(max_length=512)
     tag = serializers.CharField(max_length=100, required=False)
     project_id = serializers.CharField(max_length=100, required=False)
+    inference_log_id = serializers.CharField(max_length=100, required=False)
 
     def validate(self, data):
         local_path = data.get("local_path")
@@ -80,6 +82,7 @@ class UpdateFileDao(serializers.Serializer):
     hosted_url = serializers.CharField(max_length=512, required=False)
     tag = serializers.CharField(max_length=100, required=False)
     project_id = serializers.CharField(max_length=100, required=False)
+    inference_log_id = serializers.CharField(max_length=100, required=False)
 
 
 class FileListFilterDao(serializers.Serializer):

@@ -3,30 +3,6 @@ from rest_framework import serializers
 
 from ai_project.models import AIModel, AppSetting, BackupTiming, InferenceLog, InternalFileObject, Project, Setting, Shot, Timing, User
 
-class InternalFileDto(serializers.ModelSerializer):
-    class Meta:
-        model = InternalFileObject
-        fields = ('uuid', 'name', 'local_path', 'type',  'hosted_url', 'created_on')
-
-class UserDto(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'uuid',
-            'name',
-            'email',
-            'type'
-        )
-
-class ProjectDto(serializers.ModelSerializer):
-    user_uuid = serializers.SerializerMethodField()
-    class Meta:
-        model = Project
-        fields = ('uuid', 'name', 'user_uuid', 'created_on', 'temp_file_list')
-
-    def get_user_uuid(self, obj):
-        return obj.user.uuid
-    
 
 class AIModelDto(serializers.ModelSerializer):
     user_uuid = serializers.SerializerMethodField()
@@ -49,6 +25,54 @@ class AIModelDto(serializers.ModelSerializer):
 
     def get_user_uuid(self, obj):
         return obj.user.uuid
+
+
+class ProjectDto(serializers.ModelSerializer):
+    user_uuid = serializers.SerializerMethodField()
+    class Meta:
+        model = Project
+        fields = ('uuid', 'name', 'user_uuid', 'created_on', 'temp_file_list')
+
+    def get_user_uuid(self, obj):
+        return obj.user.uuid
+    
+
+class InferenceLogDto(serializers.ModelSerializer):
+    project = ProjectDto()
+    model = AIModelDto()
+
+    class Meta:
+        model = InferenceLog
+        fields = (
+            "uuid",
+            "project", 
+            "model", 
+            "input_params", 
+            "output_details", 
+            "total_inference_time",
+            "created_on",
+            "updated_on",
+            "status"
+        )
+
+
+class InternalFileDto(serializers.ModelSerializer):
+    project = ProjectDto()
+    inference_log = InferenceLogDto()
+    class Meta:
+        model = InternalFileObject
+        fields = ('uuid', 'name', 'local_path', 'type',  'hosted_url', 'created_on', 'inference_log', 'project')
+
+class UserDto(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'uuid',
+            'name',
+            'email',
+            'type'
+        )
+
 
 class BasicShotDto(serializers.ModelSerializer):
     project = ProjectDto()
@@ -121,25 +145,6 @@ class SettingDto(serializers.ModelSerializer):
             "width",
             "height",
             "created_on"
-        )
-
-
-class InferenceLogDto(serializers.ModelSerializer):
-    project = ProjectDto()
-    model = AIModelDto()
-
-    class Meta:
-        model = InferenceLog
-        fields = (
-            "uuid",
-            "project", 
-            "model", 
-            "input_params", 
-            "output_details", 
-            "total_inference_time",
-            "created_on",
-            "updated_on",
-            "status"
         )
 
 class BackupDto(serializers.ModelSerializer):

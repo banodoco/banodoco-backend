@@ -199,7 +199,7 @@ class FrameTimingView(APIView):
         if not timing:
             return success({}, 'invalid timing uuid', False)
         
-        timing.is_disabled = False
+        timing.is_disabled = True
         timing.save()
         
         return success({}, 'timing deleted successfully', True)
@@ -269,7 +269,7 @@ class TimingNumberView(APIView):
             return success({}, 'invalid timing uuid', False)
         
         res_timing = Timing.objects.filter(shot=timing.shot, \
-                        aux_frame_index=timing.aux_frame_index + attributes.data['distance'], project_id=timing.project_id, is_disabled=False).first()
+                        aux_frame_index=timing.aux_frame_index + attributes.data['distance'], shot_id=timing.shot_id, is_disabled=False).first()
         
         payload = {
             'data': TimingDto(res_timing).data if res_timing else None
@@ -289,7 +289,7 @@ class ShiftTimingView(APIView):
         if not timing:
             return success({}, 'invalid timing uuid', False)
         
-        timing_list = Timing.objects.filter(project_id=timing.project.id, \
+        timing_list = Timing.objects.filter(shot_id=timing.shot.id, \
                                             aux_frame_index__gte=timing.aux_frame_index, is_disabled=False).order_by('aux_frame_index')
         
         timing_list.update(aux_frame_index=F('aux_frame_index') + attributes.data['shift'])
@@ -324,8 +324,8 @@ class TimingListView(APIView):
             del attributes._data['project_id']
             attributes._data['shot_id__in'] = [s.id for s in shot_list]
             
-        elif 'shot' in attributes.data and attributes.data['shot']:
-            shot: Shot = Shot.objects.filter(uuid=attributes.data['shot'], is_disabled=False).first()
+        elif 'shot_id' in attributes.data and attributes.data['shot_id']:
+            shot: Shot = Shot.objects.filter(uuid=attributes.data['shot_id'], is_disabled=False).first()
             if not shot:
                 return success({}, 'invalid shot uuid', False)
             

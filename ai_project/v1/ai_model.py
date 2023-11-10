@@ -29,7 +29,8 @@ class AIModelView(APIView):
             (str(request.role_id).replace('-', '') != attributes.data['user_id'].replace('-', '') and request.role_type != UserType.ADMIN.value):
             return unauthorized({})
         
-        current_user = User.objects.filter(uuid=attributes.data['user_id'], is_disabled=False).first()
+        current_user_uuid = attributes.data['user_id'] if 'user_id' in attributes.data else request.role_id
+        current_user = User.objects.filter(uuid=current_user_uuid, is_disabled=False).first()
         if not current_user:
             return unauthorized({})
 

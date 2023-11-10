@@ -51,7 +51,7 @@ class CreateFileDao(serializers.Serializer):
     type = serializers.ChoiceField(choices=InternalFileType.value_list())
     local_path = serializers.CharField(max_length=512, required=False)
     hosted_url = serializers.CharField(max_length=512)
-    tag = serializers.CharField(max_length=100, required=False)
+    tag = serializers.CharField(max_length=100, allow_blank=True, required=False)
     project_id = serializers.CharField(max_length=100, required=False)
     inference_log_id = serializers.CharField(max_length=100, required=False)
 
@@ -80,7 +80,7 @@ class UpdateFileDao(serializers.Serializer):
     )
     local_path = serializers.CharField(max_length=512, required=False)
     hosted_url = serializers.CharField(max_length=512, required=False)
-    tag = serializers.CharField(max_length=100, required=False)
+    tag = serializers.CharField(max_length=100, allow_blank=True, required=False)
     project_id = serializers.CharField(max_length=100, required=False)
     inference_log_id = serializers.CharField(max_length=100, required=False)
 
@@ -318,8 +318,9 @@ class FetchShotDao(serializers.Serializer):
     def validate(self, data):
         project_id = data.get("project_id")
         shot_idx = data.get("shot_idx")
+        uuid = data.get("uuid")
 
-        if not project_id and not shot_idx:
+        if not project_id and not shot_idx and not uuid:
             raise serializers.ValidationError(
                 "At least one of project_id or shot_idx is required."
             )

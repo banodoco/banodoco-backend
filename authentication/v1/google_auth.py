@@ -1,4 +1,6 @@
+import json
 import traceback
+from ai_data.models import TrainingData
 from authentication.models import Session
 from authentication.v1.serializers.dao import GoogleIDTokenDao
 from rest_framework.views import APIView
@@ -25,6 +27,14 @@ class UserGoogleLoginView(APIView):
         if not user_data:
             return success({}, "invalid auth token", False)
         
+        invite_data = TrainingData.objects.filter(video_url='invite_list', is_disabled=False).first()
+        if invite_data:
+            invite_list = json.loads(invite_data.user_data) if invite_data.user_data else []
+            if user_data["email"] not in invite_list:
+                return success({}, "user not in the invite list", False)
+        else:
+            return success({}, "user not in the invite list", False)
+
         user = User.objects.filter(email=user_data["email"], is_disabled=False).first()
         if not user:
             # user_data['credits'] = 20

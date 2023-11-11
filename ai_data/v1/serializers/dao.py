@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 class TrainingDataDao(serializers.Serializer):
-    uuid = serializers.CharField(max_length=100, allow_blank=True, allow_null=True, required=False)
-    video_url = serializers.CharField(max_length=None, allow_blank=True, allow_null=True, required=False)
+    video_url = serializers.CharField(max_length=None, default="invite_list", required=False)
+    user_email = serializers.CharField(max_length=None, required=False)
 
     def validate(self, data):
         uuid = data.get("uuid")
@@ -16,7 +16,8 @@ class TrainingDataDao(serializers.Serializer):
         return data
 
 class CreateTrainingDataDao(serializers.Serializer):
-    video_url = serializers.CharField(max_length=None)
+    video_url = serializers.CharField(max_length=None, default="invite_list", required=False)
+    user_email = serializers.CharField(max_length=None, required=False)
     
 
 class UpdateTrainingDataDao(serializers.Serializer):

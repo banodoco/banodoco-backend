@@ -1,3 +1,4 @@
+import json
 from rest_framework.views import APIView
 from ai_data.models import TrainingData
 from ai_data.v1.serializers.dao import CreateTrainingDataDao, TrainingDataDao, TrainingDataFilterDao, UpdateTrainingDataDao
@@ -40,14 +41,20 @@ class TrainingDataCRUDView(APIView):
             return bad_request(attributes.errors)
         
         ai_data = self._get_training_data(attributes.data)
-
-        if not ai_data:
-            data = {
+        data = {
                 "video_url": attributes.data['video_url'],
-                'user_data': None
             }
-
+        if not ai_data:
+            user_data = json.dumps([attributes.data['user_email']])
+            data.update({'user_data': user_data})
             ai_data = TrainingData.objects.create(**data)
+        else:
+            user_data = json.loads(ai_data.user_data) if ai_data.user_data else []
+            user_data.append(attributes.data['user_email'])
+            user_data = list(set(user_data))
+            user_data = json.dumps(user_data)
+            ai_data.user_data = user_data
+            ai_data.save()
 
         payload = {
             'data': TrainingDataDto(ai_data).data
@@ -94,10 +101,14 @@ class TrainingDataCRUDView(APIView):
 
         ai_data = self._get_training_data(attributes.data)
         if ai_data:
-            ai_data.is_disabled = True
+            user_data = json.loads(ai_data.user_data) if ai_data.user_data else []
+            user_data = [item for item in user_data if item != attributes.data['user_email']]
+            user_data = list(set(user_data))
+            user_data = json.dumps(user_data)
+            ai_data.user_data = user_data
             ai_data.save()
 
-        return success({}, 'data cleared', True)
+        return success({}, 'email cleared', True)
 
 class TrainingDataListView(APIView):
     def __init__(self):

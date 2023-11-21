@@ -191,6 +191,8 @@ class FileListView(APIView):
         del attributes._data["page"]
         self.data_per_page = attributes.data["data_per_page"]
         del attributes._data["data_per_page"]
+        sort_order = attributes.data["sort_order"]
+        del attributes._data["sort_order"]
 
         self.file_list = InternalFileObject.objects.all()
 
@@ -206,9 +208,8 @@ class FileListView(APIView):
         attributes._data["is_disabled"] = False
 
         self.file_list = self.file_list.filter(**attributes.data)
-        if attributes.data["sort_order"]:
-            if attributes.data["sort_order"] == SortOrder.DESCENDING.value:
-                self.file_list = self.file_list.order_by('-created_on')
+        if sort_order == SortOrder.DESCENDING.value:
+            self.file_list = self.file_list.order_by('-created_on')
 
         paginator = Paginator(self.file_list, self.data_per_page)
         if page > paginator.num_pages or page < 1:

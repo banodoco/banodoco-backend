@@ -16,7 +16,7 @@ class UserLoginView(APIView):
             return bad_request(attributes.errors)
 
         user = User.objects.filter(email=attributes.data['email'], is_disabled=False).first()
-        if not user or not check_password(attributes.data['password'], user.password):
+        if not user or not (user.password and check_password(attributes.data['password'], user.password)):
             return success({}, 'invalid credentials', False)
         
         token, refresh_token = generate_tokens(user.uuid, user.type)

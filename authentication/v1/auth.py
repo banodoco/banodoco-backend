@@ -34,9 +34,7 @@ class UserLoginView(APIView):
 class RefreshTokenView(APIView):
     @refresh_token()
     def get(self, request):
-        user = get_model_instance(
-            model_id=request.role_id, model_type=request.role_type
-        )
+        user = User.objects.filter(uuid=request.role_id, is_disabled=False).first()
         if not user:
             return success({}, "no user found", False)
 

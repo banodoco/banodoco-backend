@@ -6,6 +6,7 @@ from ai_project.constants import (
     AnimationStyleType,
     GuidanceType,
     InternalFileType,
+    SortOrder,
 )
 
 class UUIDDao(serializers.Serializer):
@@ -93,6 +94,7 @@ class FileListFilterDao(serializers.Serializer):
     tag = serializers.CharField(max_length=100, required=False)
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
+    sort_order = serializers.CharField(default=SortOrder.ASCENDING.value, required=False)
 
 
 ################# PROJECT #############

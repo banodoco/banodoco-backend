@@ -66,6 +66,10 @@ class AnimationStyleType(ExtendedEnum):
     INTERPOLATION = "Interpolation"
     DIRECT_MORPHING = "Direct Morphing"
 
+class SortOrder(ExtendedEnum):
+    ASCENDING = "asc"
+    DESCENDING = "desc"
+
 class InferenceType(ExtendedEnum):
     FRAME_TIMING_IMAGE_INFERENCE = "frame_timing_inference"         # for generating variants of a frame
     FRAME_TIMING_VIDEO_INFERENCE = "frame_timing_video_inference"   # for generating variants of a video

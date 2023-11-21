@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from django.db import models
 from django.core.paginator import Paginator
-from ai_project.constants import S3_FOLDER_PATH
+from ai_project.constants import S3_FOLDER_PATH, SortOrder
 from ai_project.models import InferenceLog, InternalFileObject, Project
 from ai_project.v1.serializers.dao import (
     CreateFileDao,
@@ -206,6 +206,9 @@ class FileListView(APIView):
         attributes._data["is_disabled"] = False
 
         self.file_list = self.file_list.filter(**attributes.data)
+        if attributes.data["sort_order"]:
+            if attributes.data["sort_order"] == SortOrder.DESCENDING.value:
+                self.file_list = self.file_list.order_by('-created_on')
 
         paginator = Paginator(self.file_list, self.data_per_page)
         if page > paginator.num_pages or page < 1:

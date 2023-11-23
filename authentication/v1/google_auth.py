@@ -27,13 +27,13 @@ class UserGoogleLoginView(APIView):
         if not user_data:
             return success({}, "invalid auth token", False)
         
-        # invite_data = TrainingData.objects.filter(video_url='invite_list', is_disabled=False).first()
-        # if invite_data:
-        #     invite_list = json.loads(invite_data.user_data) if invite_data.user_data else []
-        #     if user_data["email"] not in invite_list:
-        #         return success({}, "user not in the invite list", False)
-        # else:
-        #     return success({}, "user not in the invite list", False)
+        invite_data = TrainingData.objects.filter(video_url='invite_list', is_disabled=False).first()
+        if invite_data:
+            invite_list = json.loads(invite_data.user_data) if invite_data.user_data else []
+            if user_data["email"] not in invite_list:
+                return success({}, "user not in the invite list", False)
+        else:
+            return success({}, "user not in the invite list", False)
 
         user = User.objects.filter(email=user_data["email"], is_disabled=False).first()
         if not user:

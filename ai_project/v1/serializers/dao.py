@@ -334,7 +334,9 @@ class ShotListFilterDao(serializers.Serializer):
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
 
-
 class AddShotClipDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
     interpolated_clip_id = serializers.CharField(max_length=None)
+
+class GetAppSecretDao(serializers.Serializer):
+    secret_access = serializers.CharField(max_length=100)

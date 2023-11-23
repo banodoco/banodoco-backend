@@ -1,7 +1,8 @@
 from rest_framework.views import APIView
 from ai_project.models import AppSetting
-from ai_project.v1.serializers.dao import CreateAppSettingDao, OptionalUUIDDao, UUIDDao, UpdateAppSettingDao
+from ai_project.v1.serializers.dao import CreateAppSettingDao, GetAppSecretDao, OptionalUUIDDao, UUIDDao, UpdateAppSettingDao
 from ai_project.v1.serializers.dto import AppSettingDto
+from banodoco.settings import SECRET_ACCESS_TOKEN
 
 from middleware.authentication import auth_required
 from middleware.response import bad_request, success, unauthorized
@@ -119,7 +120,14 @@ class AppSettingView(APIView):
 # TODO: figure how to store the encryption secret key
 class AppSecretView(APIView):
     @auth_required('admin', 'user')
-    def get(self, request):
+    def post(self, request):
+        attributes = GetAppSecretDao(data=request.data)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+
+        if attributes.data['secret_access'] != SECRET_ACCESS_TOKEN:
+            return unauthorized({})
+
         user_uuid = request.role_id
         if user_uuid:
             user: User = User.objects.filter(uuid=user_uuid, is_disabled=False).first()

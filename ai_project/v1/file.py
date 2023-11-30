@@ -26,19 +26,19 @@ class FileView(APIView):
         attributes = UUIDDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
-
+        
         file = InternalFileObject.objects.filter(
             uuid=attributes.data["uuid"], is_disabled=False
         ).first()
         if not file:
             return success({}, "invalid file uuid", False)
 
-        if file.project:
-            if (
-                str(file.project.user.uuid).replace('-','') != request.role_id
-                and request.role_id != UserType.ADMIN.value
-            ):
-                return unauthorized({})
+        # if file.project:
+        #     if (
+        #         str(file.project.user.uuid).replace('-','') != request.role_id
+        #         and request.role_id != UserType.ADMIN.value
+        #     ):
+        #         return unauthorized({})
 
         payload = {
             "data": InternalFileDto(file).data,

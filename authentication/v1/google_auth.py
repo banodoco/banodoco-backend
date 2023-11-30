@@ -40,7 +40,7 @@ class UserGoogleLoginView(APIView):
             # user_data['credits'] = 20
             user = User.objects.create(**user_data)
 
-        token, refresh_token = generate_tokens(user.uuid, "user")
+        token, refresh_token = generate_tokens(user.uuid, user.type)
         Session.objects.create(
             role_id=user.id, role_type="user", token=token, refresh_token=refresh_token
         )

@@ -89,13 +89,13 @@ class FrameTimingView(APIView):
                 attributes._data['canny_image_id'] = canny_image.id
         
 
-        if 'primay_image_id' in attributes.data:
-            if attributes.data['primay_image_id'] != None:
-                primay_image = InternalFileObject.objects.filter(uuid=attributes.data['primay_image_id'], is_disabled=False).first()
+        if 'primary_image_id' in attributes.data:
+            if attributes.data['primary_image_id'] != None:
+                primay_image = InternalFileObject.objects.filter(uuid=attributes.data['primary_image_id'], is_disabled=False).first()
                 if not primay_image:
                     return success({}, 'invalid primary image uuid', False)
                 
-                attributes._data['primay_image_id'] = primay_image.id
+                attributes._data['primary_image_id'] = primay_image.id
         
         
         timing = Timing.objects.create(**attributes.data)

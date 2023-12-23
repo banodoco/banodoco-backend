@@ -12,6 +12,7 @@ from django.core.paginator import Paginator
 from middleware.authentication import auth_required
 from middleware.response import bad_request, success, unauthorized
 from user.constants import UserType
+from user.models import User
 
 
 class InferenceLogView(APIView):
@@ -174,6 +175,13 @@ class InferenceLogListView(APIView):
                 return success({}, "invalid model", False)
 
             attributes._data["model_id"] = model.id
+
+        if request.role_type != UserType.ADMIN.value:
+            user = User.objects.filter(uuid=request.role_id).first()
+            user_project_id_list = Project.objects.filter(user_id=user.id).values_list('id', flat=True)
+            if 'project_id' in attributes.data:
+                del attributes._data['project_id']
+            attributes._data['project_id__in'] = user_project_id_list
 
         attributes._data["is_disabled"] = False
 

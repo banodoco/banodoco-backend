@@ -61,7 +61,7 @@ class FileView(APIView):
         if file.project:
             if (
                 str(file.project.user.uuid).replace('-','') != request.role_id
-                and request.role_id != UserType.ADMIN.value
+                and request.role_type != UserType.ADMIN.value
             ):
                 return unauthorized({})
 

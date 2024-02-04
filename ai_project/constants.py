@@ -49,6 +49,7 @@ class InternalFileTag(ExtendedEnum):
     TEMP_IMAGE = 'temp'
     GALLERY_IMAGE = 'gallery_image'
     SHORTLISTED_GALLERY_IMAGE = 'shortlisted_gallery_image'
+    TEMP_GALLERY_IMAGE = 'temp_gallery_image'
 
 class InferenceParamType(ExtendedEnum):
     REPLICATE_INFERENCE = "replicate_inference"     # replicate url for queue inference and other data

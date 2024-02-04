@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from ai_project.v1.ai_model import AIModelListView, AIModelView
 from ai_project.v1.app_setting import AppSecretView, AppSettingView
-from ai_project.v1.file import FileListView, FileUUIDListView, FileView, UploadFileView
+from ai_project.v1.file import FileListView, FileUUIDListView, FileView, TempGalleryFileView, UploadFileView
 from ai_project.v1.inference_log import InferenceLogListView, InferenceLogView
 from ai_project.v1.project import ProjectListView, ProjectView
 from ai_project.v1.project_setting import LockAPIView, ProjectSettingView
@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^file/upload$', UploadFileView.as_view()),
     url(r'^file/uuid-list$', FileUUIDListView.as_view()),
     url(r'^file/list$', FileListView.as_view()),
+    url(r'^file/extra$', TempGalleryFileView.as_view()),
     # app setting
     url(r'^app-setting$', AppSettingView.as_view()),
     url(r'^app-secret$', AppSecretView.as_view()),

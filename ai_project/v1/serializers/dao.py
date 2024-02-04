@@ -96,6 +96,10 @@ class FileListFilterDao(serializers.Serializer):
     data_per_page = serializers.IntegerField(default=100)
     sort_order = serializers.CharField(default=SortOrder.ASCENDING.value, required=False)
 
+class FileCountDao(serializers.Serializer):
+    file_tag = serializers.CharField(max_length=100, required=False)
+    project_uuid = serializers.CharField(max_length=100)
+
 
 ################# PROJECT #############
 class CreateProjectDao(serializers.Serializer):

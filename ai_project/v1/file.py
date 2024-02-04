@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
 from django.db import models
 from django.core.paginator import Paginator
-from ai_project.constants import S3_FOLDER_PATH, SortOrder
+from ai_project.constants import S3_FOLDER_PATH, InternalFileTag, SortOrder
 from ai_project.models import InferenceLog, InternalFileObject, Project
 from ai_project.v1.serializers.dao import (
     CreateFileDao,
+    FileCountDao,
     FileListFilterDao,
     FileUUIDListDao,
     LogUUIDListDao,
@@ -251,3 +252,48 @@ class UploadFileView(APIView):
             return success(payload, "file uploaded succesfully", True)
         else:
             return success(payload, "file could not be uploaded", False)
+        
+
+class TempGalleryFileView(APIView):
+     @auth_required('admin', 'data_entry', 'user')
+     def get(self, request):
+        attributes = FileCountDao(data=request.query_params)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+
+        project = Project.objects.filter(uuid=attributes.data["project_uuid"], is_disabled=False).first()
+        if not project:
+            return success({}, "invalid project", False)
+        
+        filter_data = {
+            'is_disabled': False,
+            'project_id': project.id
+        }
+
+        if 'file_tag' in attributes.data and attributes.data['file_tag']:
+            filter_data['tag'] = attributes.data['file_tag']
+
+        count = InternalFileObject.objects.filter(**filter_data).count()
+
+        payload = {
+            'data': count
+        }
+
+        return success(payload, "file count fetched successfully", True)
+     
+     @auth_required('admin', 'data_entry', 'user')
+     def put(self, request):
+         attributes = UUIDDao(data=request.data)
+         if not attributes.is_valid():
+             return bad_request(attributes.errors)
+         
+         project = Project.objects.filter(uuid=attributes.data["uuid"], is_disabled=False).first()
+         if not project:
+            return success({}, "invalid project", False)
+         
+         InternalFileObject.objects.filter(
+            tag=InternalFileTag.TEMP_GALLERY_IMAGE.value, 
+            project_id=project.id,
+            is_disabled=False).update(tag=InternalFileTag.GALLERY_IMAGE.value)
+         
+         return success({}, "success", True)

@@ -61,7 +61,7 @@ class InternalFileDto(serializers.ModelSerializer):
     inference_log = InferenceLogDto()
     class Meta:
         model = InternalFileObject
-        fields = ('uuid', 'name', 'local_path', 'type',  'hosted_url', 'created_on', 'inference_log', 'project')
+        fields = ('uuid', 'name', 'local_path', 'type',  'hosted_url', 'created_on', 'inference_log', 'project', 'tag')
 
 class UserDto(serializers.ModelSerializer):
     class Meta:

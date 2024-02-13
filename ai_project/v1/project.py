@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
-from ai_project.models import Project
-from ai_project.v1.serializers.dao import CreateProjectDao, ProjectFilterDao, UUIDDao, UpdateProjectDao
+from ai_project.constants import InternalFileTag
+from ai_project.models import InferenceLog, InternalFileObject, Project
+from ai_project.v1.serializers.dao import CreateProjectDao, ProjectFilterDao, ProjectStatsDao, UUIDDao, UpdateProjectDao
 from ai_project.v1.serializers.dto import ProjectDto
 from django.core.paginator import Paginator
 
@@ -132,3 +133,27 @@ class  ProjectListView(APIView):
             ).data,
         }
         return success(payload, "project list fetched successfully", True)
+    
+
+class ProjectStatsView(APIView):
+    @auth_required('admin', 'user')
+    def get(self, request):
+        attributes = ProjectStatsDao(data=request.query_params)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+
+        project = Project.objects.filter(uuid=attributes.data['project_uuid'], is_disabled=False).first()
+        if not project:
+            return success({}, 'invalid project uuid', False)
+
+        temp_image_count = InternalFileObject.objects.filter(tag=InternalFileTag.TEMP_GALLERY_IMAGE.value,\
+                                                              project_id=project.id, is_disabled=False).count()
+        pending_image_count = InferenceLog.objects.filter(status__in=attributes.data['log_status_list'], is_disabled=False).count()
+        payload = {
+            'data': {
+                'temp_image_count': temp_image_count,
+                'pending_image_count': pending_image_count
+            }
+        }
+
+        return success(payload, "success", True)

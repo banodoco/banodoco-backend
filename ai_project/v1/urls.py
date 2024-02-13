@@ -3,7 +3,7 @@ from ai_project.v1.ai_model import AIModelListView, AIModelView
 from ai_project.v1.app_setting import AppSecretView, AppSettingView
 from ai_project.v1.file import FileListView, FileUUIDListView, FileView, TempGalleryFileView, UploadFileView
 from ai_project.v1.inference_log import InferenceLogListView, InferenceLogView
-from ai_project.v1.project import ProjectListView, ProjectView
+from ai_project.v1.project import ProjectListView, ProjectStatsView, ProjectView
 from ai_project.v1.project_setting import LockAPIView, ProjectSettingView
 from ai_project.v1.shot import ShotCRUDView, ShotClipView, ShotDuplicateView, ShotListView
 
@@ -19,6 +19,7 @@ urlpatterns = [
     # project
     url(r'^project$', ProjectView.as_view()),
     url(r'^project/list$', ProjectListView.as_view()),
+    url(r'^project/stats$', ProjectStatsView.as_view()),
     # project setting
     url(r'^project-setting$', ProjectSettingView.as_view()),
     # inference log

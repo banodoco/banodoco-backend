@@ -102,6 +102,10 @@ class FileCountDao(serializers.Serializer):
 
 
 ################# PROJECT #############
+class ProjectStatsDao(serializers.Serializer):
+    project_uuid = serializers.CharField(max_length=100)
+    log_status_list = serializers.ListField(child=serializers.CharField(max_length=100), required=False)    
+
 class CreateProjectDao(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     user_id = serializers.CharField(max_length=100, required=False)

@@ -194,8 +194,15 @@ class FileListView(APIView):
         del attributes._data["data_per_page"]
         sort_order = attributes.data["sort_order"]
         del attributes._data["sort_order"]
+        shot_uuid_list = []
+        if 'shot_uuid_list' in attributes.data:
+            shot_uuid_list = attributes.data['shot_uuid_list']
+            del attributes._data['shot_uuid_list']
 
         self.file_list = InternalFileObject.objects.all()
+        
+        if shot_uuid_list and len(shot_uuid_list):
+            file_list = file_list.filter(shot_uuid__in=shot_uuid_list)
 
         print(attributes.data)
         if "project_id" in attributes.data:

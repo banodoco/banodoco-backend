@@ -55,6 +55,7 @@ class CreateFileDao(serializers.Serializer):
     tag = serializers.CharField(max_length=100, allow_blank=True, required=False)
     project_id = serializers.CharField(max_length=100, required=False)
     inference_log_id = serializers.CharField(max_length=100, required=False)
+    shot_uuid = serializers.CharField(max_length=512, required=False, default="")
 
     def validate(self, data):
         local_path = data.get("local_path")
@@ -72,6 +73,7 @@ class UploadFileDao(serializers.Serializer):
     extension = serializers.CharField(default="", required=False)
     type = serializers.CharField(default='general_pics')
     optimize = serializers.BooleanField(default=False)
+    shot_uuid = serializers.CharField(max_length=512, required=False)
 
 class UpdateFileDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
@@ -84,6 +86,7 @@ class UpdateFileDao(serializers.Serializer):
     tag = serializers.CharField(max_length=100, allow_blank=True, required=False)
     project_id = serializers.CharField(max_length=100, required=False)
     inference_log_id = serializers.CharField(max_length=100, required=False)
+    shot_uuid = serializers.CharField(max_length=512, required=False)
 
 
 class FileListFilterDao(serializers.Serializer):
@@ -173,6 +176,7 @@ class CreateInferenceLogDao(serializers.Serializer):
     output_details = serializers.CharField(required=False)
     total_inference_time = serializers.CharField(required=False)
     status = serializers.CharField(required=False, default="")
+    model_name = serializers.CharField(max_length=512, required=False, default="")
 
 class UpdateInferenceLogDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
@@ -182,6 +186,7 @@ class UpdateInferenceLogDao(serializers.Serializer):
     output_details = serializers.CharField(required=False)
     total_inference_time = serializers.CharField(required=False)
     status = serializers.CharField(required=False)
+    model_name = serializers.CharField(max_length=512, required=False)
 
 class InferenceLogListFilterDao(serializers.Serializer):
     project_id = serializers.CharField(max_length=100, required=False)
@@ -189,6 +194,7 @@ class InferenceLogListFilterDao(serializers.Serializer):
     page = serializers.IntegerField(default=1)
     data_per_page = serializers.IntegerField(default=100)
     status_list = serializers.ListField(child=serializers.CharField(max_length=100), required=False, default=None)
+    model_name_list = serializers.ListField(child=serializers.CharField(max_length=512), required=False, default=list)
 
 
 ################ PARAM MAP ###############
@@ -309,6 +315,7 @@ class CreateShotDao(serializers.Serializer):
     duration = serializers.FloatField()
     meta_data = serializers.CharField(max_length=None, default=None, allow_null=True, allow_blank=True)
     project_id = serializers.CharField(max_length=100)
+    model_name = serializers.CharField(max_length=512, allow_blank=True, required=False, default="")
 
 
 class UpdateShotDao(serializers.Serializer):
@@ -319,6 +326,7 @@ class UpdateShotDao(serializers.Serializer):
     duration = serializers.FloatField(required=False)
     meta_data = serializers.CharField(max_length=None, required=False)
     main_clip_id = serializers.CharField(max_length=100, required=False)
+    model_name = serializers.CharField(max_length=512, allow_blank=True, required=False, default="")
 
 class FetchShotDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100, required=False)

@@ -49,6 +49,7 @@ class InferenceLog(BaseModel):
     total_inference_time = models.FloatField(default=0)
     total_credits_used = models.FloatField(default=0)
     status = models.CharField(max_length=255, default="")   # success, failed, in_progress
+    model_name = models.CharField(max_length=512, default="", blank=True)
 
     class Meta:
         db_table = 'inference_log'
@@ -70,6 +71,7 @@ class InternalFileObject(BaseModel):
     tag = models.CharField(max_length=255,default="")  # background_image, mask_image, canny_image etc..
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, default=None, null=True)
     inference_log = models.ForeignKey(InferenceLog, on_delete=models.SET_NULL, default=None, null=True)
+    shot_uuid = models.CharField(max_length=255, default="", blank=True)    # NOTE: this is not a foreignkey and purely for filtering purpose
 
     class Meta:
         db_table = 'file'

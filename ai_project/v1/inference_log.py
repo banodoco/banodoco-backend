@@ -184,6 +184,9 @@ class InferenceLogListView(APIView):
             attributes._data['project_id__in'] = user_project_id_list
 
         attributes._data["is_disabled"] = False
+        if "model_name_list" in attributes.data:
+            model_name_list = attributes.data["model_name_list"] if attributes.data["model_name_list"] else []
+            del attributes._data["model_name_list"]
 
         if "status_list" in attributes.data and attributes.data['status_list']:
             attributes._data['status__in'] = attributes.data['status_list']
@@ -193,6 +196,9 @@ class InferenceLogListView(APIView):
             del attributes._data['status_list']
             self.log_list = InferenceLog.objects.filter(**attributes.data).exclude(status="").order_by('-created_on').all()
 
+        if model_name_list and len(model_name_list):
+            self.log_list = self.log_list.filter(model_name__in=model_name_list)
+            
         self.log_list = self.log_list.exclude(model_id=None)      # hackish sol to exclude non-image/video logs
 
         paginator = Paginator(self.log_list, self.data_per_page)
